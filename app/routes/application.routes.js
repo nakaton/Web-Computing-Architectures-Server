@@ -1,6 +1,6 @@
-const application = require('../controllers/application.controller');
+const venues = require('../controllers/venues.controller');
 
 module.exports = function (app) {
     app.route(app.rootUrl + '/venues')
-        .get(application.getVenues);
+        .get(venues.getVenues);
 };
