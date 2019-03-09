@@ -99,14 +99,47 @@ exports.getVenues = async function (req, res) {
 
         //Sort By key columns and reverseSort
         if(venueSearchRequest.sortBy == null || venueSearchRequest.sortBy == ""){
-            keySort('STAR_RATING', venueSearchRequest.reverseSort);
+            keySort('meanStarRating', venueSearchRequest.reverseSort);
         }else{
             let keyArr = venueSearchRequest.sortBy.split(",");
             keyArr.forEach(function (key) {
                 console.log(key.trim());
-                keySort(key.trim(), venueSearchRequest.reverseSort);
+                switch (key.trim()) {
+                    case 'STAR_RATING':
+                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                        break;
+                    case 'COST_RATING':
+                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                        break;
+                    case 'DISTANCE':
+                        results.sort(keySort('distance', venueSearchRequest.reverseSort));
+                        break;
+                }
             })
         }
+
+        res.statusMessage = 'OK';
+        res.status(200)
+            .json(results);
+    } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+};
+
+exports.getCategories = async function (req, res) {
+
+    let sqlCommand = "select category_id as categoryId," +
+        "category_name as categoryName," +
+        "category_description as categoryDescription " +
+        "from VenueCategory;";
+
+    console.log("sqlCommand: " + sqlCommand);
+
+    try {
+        const results = await Venues.getVenues(sqlCommand);
 
         res.statusMessage = 'OK';
         res.status(200)
