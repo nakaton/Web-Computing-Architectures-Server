@@ -30,3 +30,17 @@ exports.postUser = async function (sql, registerUserRequest) {
         throw err;
     }
 };
+
+/*
+* Function 'getUser' for Retrieve information about a user.
+*/
+exports.getUser = async function (sql, userId) {
+    try {
+        let values = [userId];
+
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
