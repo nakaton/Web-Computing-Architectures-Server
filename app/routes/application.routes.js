@@ -19,7 +19,7 @@ module.exports = function (app) {
         .post(users.postUser);
 };
 
-module.exports = function (app) {
-    app.route(app.rootUrl + '/users/:id')
-        .get(users.getUser);
-};
+// module.exports = function (app) {
+//     app.route(app.rootUrl + '/users/:id')
+//         .get(users.getUser);
+// };
