@@ -13,6 +13,8 @@ module.exports = function (app) {
         .post(users.postUser);
     app.route(app.rootUrl + '/users/login')
         .post(users.login);
+    app.route(app.rootUrl + '/users/logout')
+        .post(users.logout);
     app.route(app.rootUrl + '/users/:id')
         .get(users.getUser);
 };

@@ -2,6 +2,9 @@ const Venues = require('../models/venues.model');
 
 const EARTH_RADIUS = 6378.137;
 
+/**
+ * View venues.
+ */
 exports.getVenues = async function (req, res) {
     //Extract query params from request into VenueSearchRequest
     let venueSearchRequest = new Venues.VenueSearchRequest(req.query);
@@ -129,6 +132,9 @@ exports.getVenues = async function (req, res) {
     }
 };
 
+/**
+ * Retrieves all data about venue categories.
+ */
 exports.getCategories = async function (req, res) {
 
     let sqlCommand = "select category_id as categoryId," +

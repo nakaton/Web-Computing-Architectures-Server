@@ -87,3 +87,29 @@ exports.saveToken = async function (saveTokenSql, token, userId) {
         throw err;
     }
 };
+
+/*
+* Function 'checkToken' for check token existence.
+*/
+exports.checkToken = async function (sqlCommand, token) {
+    try {
+        let values = [token];
+
+        return await db.getPool().query(sqlCommand, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'clearToken' for clear token when logout.
+*/
+exports.clearToken = async function (updateTokenSql, userId) {
+    try {
+        return await db.getPool().query(updateTokenSql, userId);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};

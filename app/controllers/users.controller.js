@@ -1,6 +1,9 @@
 const Users = require('../models/users.model');
 const jwt = require('jsonwebtoken'); // use for create token
 
+/**
+ * Register as a new user.
+ */
 exports.postUser = async function (req, res) {
     //Extract query params from request into RegisterUserRequest
     let registerUserRequest = new Users.RegisterUserRequest(req.body);
@@ -29,8 +32,11 @@ exports.postUser = async function (req, res) {
     }
 }
 
+/**
+ * Login as an existing user.
+ */
 exports.login = async function (req, res) {
-    //Extract query params from request into RegisterUserRequest
+    //Extract query params from request into LoginRequest
     let loginRequest = new Users.LoginRequest(req.body);
 
     console.log("username: " + loginRequest.username);
@@ -68,7 +74,7 @@ exports.login = async function (req, res) {
         // Input user doesn't exist
         if(results.length <= 0){
             res.statusMessage = 'User not exist';
-            res.status(200)
+            res.status(400)
                 .send();
         }else{
             //Create token
@@ -103,6 +109,51 @@ exports.login = async function (req, res) {
     }
 }
 
+/**
+ * Logs out the currently authorised user.
+ */
+exports.logout = async function (req, res) {
+    //Extract token from request Header
+    let token = req.header('X-Authorization');
+
+    console.log("token: " + token);
+
+    let sqlCommand = "select user_id as userId " +
+        "from User where auth_token = '" + token +"'";
+
+    console.log("sqlCommand: " + sqlCommand);
+
+    try{
+        const results = await Users.checkToken(sqlCommand, token);
+        if(results.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+        }else{
+            let updateTokenSql = "update User set auth_token = '' where user_id = ?;"
+            try{
+                await Users.clearToken(updateTokenSql, results[0].userId);
+                res.statusMessage = 'OK';
+                res.status(200)
+                    .send();
+            }catch (err) {
+                if (!err.hasBeenLogged) console.error(err);
+                res.statusMessage = 'Bad Request';
+                res.status(400)
+                    .send();
+            }
+        }
+    }catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+}
+
+/**
+ * Retrieve information about a user.
+ */
 exports.getUser = async function (req, res) {
     //Extract query params from request into RegisterUserRequest
     let userId = req.params.id;
