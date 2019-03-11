@@ -1,5 +1,5 @@
 const Users = require('../models/users.model');
-const jwt = require('jsonwebtoken'); //use for create token
+const jwt = require('jsonwebtoken'); // use for create token
 
 exports.postUser = async function (req, res) {
     //Extract query params from request into RegisterUserRequest
