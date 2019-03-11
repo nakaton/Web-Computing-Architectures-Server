@@ -67,8 +67,8 @@ exports.login = async function (req, res) {
 
         // Input user doesn't exist
         if(results.length <= 0){
-            res.statusMessage = 'Bad Request';
-            res.status(400)
+            res.statusMessage = 'User not exist';
+            res.status(200)
                 .send();
         }else{
             //Create token
