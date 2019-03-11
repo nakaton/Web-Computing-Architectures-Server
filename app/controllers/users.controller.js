@@ -1,4 +1,5 @@
 const Users = require('../models/users.model');
+const jwt = require('jsonwebtoken'); //use for create token
 
 exports.postUser = async function (req, res) {
     //Extract query params from request into RegisterUserRequest
@@ -20,6 +21,80 @@ exports.postUser = async function (req, res) {
         res.statusMessage = 'Created';
         res.status(201)
             .json(results);
+    } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+}
+
+exports.login = async function (req, res) {
+    //Extract query params from request into RegisterUserRequest
+    let loginRequest = new Users.LoginRequest(req.body);
+
+    console.log("username: " + loginRequest.username);
+    console.log("email: " + loginRequest.email);
+    console.log("password: " + loginRequest.password);
+
+    let sqlCommand = "select user_id as userId, " +
+        "auth_token as token " +
+        "from User " +
+        "where password = '" + loginRequest.password +"'";
+
+    // Password is necessity. Otherwise return 'Bad Request'
+    if(loginRequest.password == null || loginRequest.password == ""){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+
+    //Either username or email may be used. Otherwise return 'Bad Request'
+    if (loginRequest.username != null && loginRequest.username != ""){
+        sqlCommand += " and username = '" + loginRequest.username + "';"
+    }else if(loginRequest.email != null && loginRequest.email != ""){
+        sqlCommand += " and email = '" + loginRequest.email + "';"
+    }else {
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+
+    console.log("sqlCommand: " + sqlCommand);
+
+    try {
+        const results = await Users.isUserExist(sqlCommand);
+
+        // Input user doesn't exist
+        if(results.length <= 0){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+        }else{
+            //Create token
+            let payload = {
+                username:loginRequest.username,
+                email:loginRequest.username,
+                password:loginRequest.password
+            }
+            let token = jwt.sign(payload, 'jwt', {
+                expiresIn: 60*60*1  // expire in one hour
+            })
+            let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
+            try{
+                await Users.saveToken(saveTokenSql, token, results[0].userId);
+                results[0].token = token;
+
+                res.statusMessage = 'OK';
+                res.status(200)
+                    .json(results);
+            }catch (err) {
+                if (!err.hasBeenLogged) console.error(err);
+                res.statusMessage = 'Bad Request';
+                res.status(400)
+                    .send();
+            }
+        }
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';

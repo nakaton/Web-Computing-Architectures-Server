@@ -11,6 +11,8 @@ module.exports = function (app) {
     //users
     app.route(app.rootUrl + '/users')
         .post(users.postUser);
+    app.route(app.rootUrl + '/users/login')
+        .post(users.login);
     app.route(app.rootUrl + '/users/:id')
         .get(users.getUser);
 };

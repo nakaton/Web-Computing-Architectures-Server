@@ -13,6 +13,23 @@ exports.RegisterUserRequest = function RegisterUserRequest(registerUserRequest) 
 }
 
 /*
+* Model 'LoginRequest' for user login
+*/
+exports.LoginRequest = function LoginRequest(loginRequest) {
+    this.username = loginRequest.username;
+    this.email = loginRequest.email;
+    this.password = loginRequest.password;
+}
+
+/*
+* Model 'LoginSuccessResponse' for user login response
+*/
+exports.LoginSuccessResponse = function LoginSuccessResponse(loginSuccessResponse) {
+    this.userId = loginSuccessResponse.userId;
+    this.token = loginSuccessResponse.token;
+}
+
+/*
 * Function 'postUser' for Register as a new user.
 */
 exports.postUser = async function (sql, registerUserRequest) {
@@ -39,6 +56,32 @@ exports.getUser = async function (sql, userId) {
         let values = [userId];
 
         return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'isUserExist' for check whether user already exist or not.
+*/
+exports.isUserExist = async function (sql) {
+    try {
+        return await db.getPool().query(sql);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'saveToken' for save token when login successfully.
+*/
+exports.saveToken = async function (saveTokenSql, token, userId) {
+    try {
+        let values = [token,userId];
+
+        return await db.getPool().query(saveTokenSql, values);
     } catch (err) {
         console.log(err.sql);
         throw err;
