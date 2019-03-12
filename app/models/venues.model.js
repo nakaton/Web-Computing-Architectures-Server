@@ -69,6 +69,23 @@ exports.Venue = function Venue(venue){
 }
 
 /*
+* Model 'Admin' for Venue admin info.
+*/
+exports.Admin = function Admin(admin){
+    this.userId = admin.userId;
+    this.username = admin.username;
+}
+
+/*
+* Model 'VenuePhoto' for Venue photo info.
+*/
+exports.VenuePhoto = function Admin(venuePhoto){
+    this.photoFilename = venuePhoto.photoFilename;
+    this.photoDescription = venuePhoto.photoDescription;
+    this.isPrimary = venuePhoto.isPrimary;
+}
+
+/*
 * Model 'ChangeVenueDetailsRequest' for Change a venue's details.
 */
 exports.ChangeVenueDetailsRequest = function ChangeVenueDetailsRequest(changeVenueDetailsRequest){
@@ -82,6 +99,9 @@ exports.ChangeVenueDetailsRequest = function ChangeVenueDetailsRequest(changeVen
     this.longitude = changeVenueDetailsRequest.longitude;
 }
 
+/*
+* Model 'VenueCategory' for Venue category detail.
+*/
 exports.VenueCategory = function VenueCategory(venueCategory){
     this.categoryId = venueCategory.categoryId;
     this.categoryName = venueCategory.categoryName;
@@ -141,6 +161,19 @@ exports.postVenue = async function (sql, userId, createVenueRequest) {
             createVenueRequest.latitude,
             createVenueRequest.longitude
         ];
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'getVenueById' for retrieve venues detail
+*/
+exports.getVenueById = async function (sql, venueId) {
+    try {
+        let values = [venueId];
         return await db.getPool().query(sql, values);
     } catch (err) {
         console.log(err.sql);

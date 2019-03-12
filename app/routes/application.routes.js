@@ -10,6 +10,8 @@ module.exports = function (app) {
         .get(venues.getCategories);
     app.route(app.rootUrl + '/venues')
         .post(venues.postVenue);
+    app.route(app.rootUrl + '/venues/:id')
+        .get(venues.getVenueById);
 
     //Review
     app.route(app.rootUrl + '/venues/:id/reviews')

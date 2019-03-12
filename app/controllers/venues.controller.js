@@ -228,6 +228,76 @@ exports.postVenue = async function (req, res) {
 };
 
 /**
+ * Retrieve detailed information about a venue.
+ */
+exports.getVenueById = async function (req, res) {
+    //Extract query params from request
+    let venueId = req.params.id;
+    let token = req.header('X-Authorization');
+
+    console.log("venueId: " + venueId);
+    console.log("token: " + token);
+
+    let sqlForVenueDetail = "select Venue.venue_name as venueName, " +
+        "User.user_id as userId, " +
+        "User.username as username, " +
+        "VenueCategory.category_id as categoryId, " +
+        "VenueCategory.category_name as categoryName, " +
+        "VenueCategory.category_description as categoryDescription, " +
+        "Venue.city as city, Venue.short_description as shortDescription, " +
+        "Venue.long_description as longDescription, Venue.date_added as dateAdded, " +
+        "Venue.address as address, Venue.latitude as latitude, Venue.longitude as longitude, " +
+        "VenuePhoto.photo_filename as photoFilename, VenuePhoto.photo_description as photoDescription, " +
+        "VenuePhoto.is_primary as isPrimary " +
+        "from Venue " +
+        "left join User on Venue.admin_id = User.user_id " +
+        "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
+        "left join VenuePhoto on Venue.venue_id = VenuePhoto.venue_id " +
+        "where Venue.venue_id = ?"
+
+    console.log("sqlForVenueDetail: " + sqlForVenueDetail);
+
+    try{
+        const venueDetail = await Venues.getVenueById(sqlForVenueDetail, venueId);
+
+        if(venueDetail.length <= 0){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+        }else {
+            let result = [];
+            venueDetail.forEach(function (item) {
+                let venue = new Venues.Venue(item);
+                let admin = new Venues.Admin(item);
+                let category = new Venues.VenueCategory(item);
+                let photos = new Venues.VenuePhoto(item);
+
+                if(photos.isPrimary == 0){
+                    photos.isPrimary = false;
+                }else{
+                    photos.isPrimary = true;
+                }
+
+                venue.admin = admin;
+                venue.category = category;
+                venue.photos = photos;
+
+                result.push(venue);
+            });
+
+            res.statusMessage = 'OK';
+            res.status(200)
+                .json(result);
+        }
+    }catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+};
+
+/**
 * Calculate Distance between user and venue
 *
 * @param myLatitude: user's latitude
