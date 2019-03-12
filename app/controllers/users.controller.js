@@ -155,7 +155,7 @@ exports.logout = async function (req, res) {
  * Retrieve information about a user.
  */
 exports.getUser = async function (req, res) {
-    //Extract query params from request into RegisterUserRequest
+    //Extract query params from request
     let userId = req.params.id;
 
     console.log("userId: " + userId);
@@ -173,6 +173,43 @@ exports.getUser = async function (req, res) {
             res.statusMessage = 'OK';
             res.status(200)
                 .json(results);
+        }else{
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+        }
+    } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+}
+
+/**
+ * Change a user's details.
+ */
+exports.updateUser = async function (req, res) {
+    //Extract query params from request
+    let userId = req.params.id;
+    let token = req.header('X-Authorization');
+
+    console.log("userId: " + userId);
+
+    let sqlCommand = "select auth_token as token from User where user_id = ?";
+
+    console.log("sqlCommand: " + sqlCommand);
+
+    try {
+        const results = await Users.getUser(sqlCommand, userId);
+        if (results.length > 0){
+            if(results[0].token == token){
+
+            }else{
+                res.statusMessage = 'Unauthorized';
+                res.status(401)
+                    .send();
+            }
         }else{
             res.statusMessage = 'Not Found';
             res.status(404)
