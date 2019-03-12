@@ -130,7 +130,7 @@ exports.logout = async function (req, res) {
             res.status(401)
                 .send();
         }else{
-            let updateTokenSql = "update User set auth_token = '' where user_id = ?;"
+            let updateTokenSql = "update User set auth_token = null where user_id = ?;"
             try{
                 await Users.clearToken(updateTokenSql, results[0].userId);
                 res.statusMessage = 'OK';

@@ -50,6 +50,7 @@ exports.getLatestReview = async function (req, res) {
             .send();
     }
 }
+
 /**
  * Post a review for a venue.
  */
@@ -109,6 +110,78 @@ exports.postVenueReview = async function (req, res) {
         res.statusMessage = 'Created';
         res.status(201)
             .send();
+    }catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+}
+
+/**
+ * Retrieves all the reviews authored by a given user.
+ */
+exports.getAllReviewByUser = async function (req, res) {
+    //Extract query params from request
+    let userId = req.params.id;
+    let token = req.header('X-Authorization');
+
+    console.log("userId: " + userId);
+    console.log("token: " + token);
+
+    let sqlByToken = "select user_id as userId, username as username from User where auth_token = ?";
+
+    console.log("sqlByToken: " + sqlByToken);
+
+    try {
+        const user = await Users.getUserByToken(sqlByToken, token);
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }else{
+            let reviewAuthor = new Reviews.ReviewAuthor(user[0]);
+
+            let sqlReviewWithVenue = "select Review.review_body as reviewBody, " +
+                "Review.star_rating as starRating, " +
+                "Review.cost_rating as costRating, " +
+                "Review.time_posted as timePosted, " +
+                "Venue.venue_id as venueId, " +
+                "Venue.venue_name as venueName, " +
+                "VenueCategory.category_name as categoryName, " +
+                "Venue.city as city, " +
+                "Venue.short_description as shortDescription, " +
+                "VenuePhoto.photo_filename as primaryPhoto " +
+                "from Review " +
+                "left join Venue on Review.reviewed_venue_id = Venue.venue_id " +
+                "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
+                "left join VenuePhoto on Review.reviewed_venue_id = VenuePhoto.venue_id " +
+                "where Review.review_author_id = ?"
+
+            const results = await Reviews.getReviewWithVenue(sqlReviewWithVenue, userId);
+
+            if(results.length <= 0){
+                res.statusMessage = 'Not Found';
+                res.status(404)
+                    .send();
+            }else {
+                let reviewWithVenueArr = [];
+                results.forEach(function (item) {
+                    let reviewWithVenue = new Reviews.ReviewWithVenue(item);
+                    let venueBrief = new Reviews.VenueBrief(item);
+                    reviewWithVenue.reviewAuthor = reviewAuthor;
+                    reviewWithVenue.venue = venueBrief;
+
+                    reviewWithVenueArr.push(reviewWithVenue);
+                });
+
+                res.statusMessage = 'OK';
+                res.status(200)
+                    .json(reviewWithVenueArr);
+            }
+        }
     }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';

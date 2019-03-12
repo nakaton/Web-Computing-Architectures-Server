@@ -17,7 +17,6 @@ exports.Review = function Review(review) {
 exports.ReviewAuthor = function ReviewAuthor(reviewAuthor) {
     this.userId = reviewAuthor.userId;
     this.username = reviewAuthor.username;
-
 }
 
 /*
@@ -27,6 +26,30 @@ exports.PostReviewRequest = function PostReviewRequest(postReviewRequest) {
     this.reviewBody = postReviewRequest.reviewBody;
     this.starRating = postReviewRequest.starRating;
     this.costRating = postReviewRequest.costRating;
+}
+
+/*
+* Model 'ReviewWithVenue' for Review with Venue
+*/
+exports.ReviewWithVenue = function ReviewWithVenue(reviewWithVenue) {
+    this.reviewAuthor = reviewWithVenue.reviewAuthor;
+    this.reviewBody = reviewWithVenue.reviewBody;
+    this.starRating = reviewWithVenue.starRating;
+    this.costRating = reviewWithVenue.costRating;
+    this.timePosted = reviewWithVenue.timePosted;
+    this.venue = reviewWithVenue.venue;
+}
+
+/*
+* Model 'VenueBrief' for Venue Brief
+*/
+exports.VenueBrief = function VenueBrief(venueBrief) {
+    this.venueId = venueBrief.venueId;
+    this.venueName = venueBrief.venueName;
+    this.categoryName = venueBrief.categoryName;
+    this.city = venueBrief.city;
+    this.shortDescription = venueBrief.shortDescription;
+    this.primaryPhoto = venueBrief.primaryPhoto;
 }
 
 /*
@@ -69,6 +92,20 @@ exports.addReview = async function (sql, venueId, userId, postReviewRequest) {
             postReviewRequest.starRating,
             postReviewRequest.costRating,
             postDate];
+
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+}
+
+/*
+* Function 'getReviewWithVenue' for Retrieves all the reviews authored by a given user.
+*/
+exports.getReviewWithVenue = async function (sql, userId) {
+    try {
+        let values = [userId];
 
         return await db.getPool().query(sql, values);
     } catch (err) {
