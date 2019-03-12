@@ -214,21 +214,32 @@ exports.patchUser = async function (req, res) {
         const resultsByToken = await Users.getUserByToken(sqlByToken, token);
 
         //should return 403 when valid user data is provided but authenticated as a different user
-        if(resultsByToken[0].userId != userId){
-            res.statusMessage = 'Forbidden';
-            res.status(403)
-                .send();
-            return;
+        if (resultsByToken.length > 0) {
+            if(resultsByToken[0].userId != userId){
+                res.statusMessage = 'Forbidden';
+                res.status(403)
+                    .send();
+                return;
+            }
         }
 
-        //should return 400 when no changes are provided
-        if(resultsByUserId[0].givenName == changeUserDetailsRequest.givenName &&
-        resultsByUserId[0].familyName == changeUserDetailsRequest.familyName &&
-        resultsByUserId[0].password == changeUserDetailsRequest.password){
-            res.statusMessage = 'Bad Request';
-            res.status(400)
-                .send();
-            return;
+        if (resultsByUserId.length > 0) {
+            if (resultsByUserId[0].token == null || resultsByUserId[0].token == "") {
+                res.statusMessage = 'Unauthorized';
+                res.status(401)
+                    .send();
+                return;
+            }
+
+            //should return 400 when no changes are provided
+            if(resultsByUserId[0].givenName == changeUserDetailsRequest.givenName &&
+                resultsByUserId[0].familyName == changeUserDetailsRequest.familyName &&
+                resultsByUserId[0].password == changeUserDetailsRequest.password){
+                res.statusMessage = 'Bad Request';
+                res.status(400)
+                    .send();
+                return;
+            }
         }
 
         //should return 400 when a change of family name is present but has an empty value
@@ -250,12 +261,7 @@ exports.patchUser = async function (req, res) {
         }
 
         if (resultsByUserId.length > 0){
-            if(resultsByUserId[0].token == null || resultsByUserId[0].token == ""){
-                res.statusMessage = 'Unauthorized';
-                res.status(401)
-                    .send();
-                return;
-            }
+
             if(resultsByUserId[0].token == token){
                 let updateSql = "update User set given_name = ?, family_name = ?, password = ? " +
                     "where user_id = ?"
