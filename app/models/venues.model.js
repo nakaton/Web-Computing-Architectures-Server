@@ -123,3 +123,27 @@ exports.getCategories = async function (sql) {
         throw err;
     }
 };
+
+/*
+* Function 'postVenue' for Add venues
+*/
+exports.postVenue = async function (sql, userId, createVenueRequest) {
+    try {
+        let postDate = new Date();
+        let values = [userId,
+            createVenueRequest.categoryId,
+            createVenueRequest.venueName,
+            createVenueRequest.city,
+            createVenueRequest.shortDescription,
+            createVenueRequest.longDescription,
+            postDate,
+            createVenueRequest.address,
+            createVenueRequest.latitude,
+            createVenueRequest.longitude
+        ];
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};

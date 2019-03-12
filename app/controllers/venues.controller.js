@@ -1,4 +1,5 @@
 const Venues = require('../models/venues.model');
+const Users = require('../models/users.model');
 
 const EARTH_RADIUS = 6378.137;
 
@@ -136,6 +137,74 @@ exports.getVenues = async function (req, res) {
  * Retrieves all data about venue categories.
  */
 exports.getCategories = async function (req, res) {
+
+    let sqlCommand = "select category_id as categoryId," +
+        "category_name as categoryName," +
+        "category_description as categoryDescription " +
+        "from VenueCategory;";
+
+    console.log("sqlCommand: " + sqlCommand);
+
+    try {
+        const results = await Venues.getVenues(sqlCommand);
+
+        res.statusMessage = 'OK';
+        res.status(200)
+            .json(results);
+    } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+};
+
+/**
+ * Add a new venue.
+ */
+exports.postVenue = async function (req, res) {
+    //Extract query params from request
+    let token = req.header('X-Authorization');
+    let createVenueRequest = new Venues.CreateVenueRequest(req.body);
+
+    console.log("token: " + token);
+
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    let sqlForVenueRegister = "insert into Venue (admin_id, " +
+        "category_id, venue_name, city, " +
+        "short_description, long_description, " +
+        "date_added, address, latitude, longitude) " +
+        "values (?,?,?,?,?,?,?,?,?,?)";
+
+    console.log("sqlByToken: " + sqlByToken);
+    console.log("sqlForVenueRegister: " + sqlForVenueRegister);
+
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }else{
+            const venue = await Venues.postVenue(sqlForVenueRegister, user[0].userId, createVenueRequest);
+            let results = {
+                "venueId": venue.insertId
+            }
+
+            res.statusMessage = 'Created';
+            res.status(201)
+                .json(results);
+        }
+    }catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+
 
     let sqlCommand = "select category_id as categoryId," +
         "category_name as categoryName," +
