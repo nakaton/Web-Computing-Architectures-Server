@@ -168,7 +168,7 @@ exports.getUser = async function (req, res) {
     console.log("sqlCommand: " + sqlCommand);
 
     try {
-        const results = await Users.getUser(sqlCommand, userId);
+        const results = await Users.getUserByUserId(sqlCommand, userId);
         if (results != null && results != ""){
             res.statusMessage = 'OK';
             res.status(200)

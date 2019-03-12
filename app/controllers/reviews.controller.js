@@ -1,4 +1,6 @@
 const Reviews = require('../models/reviews.model');
+const Users = require('../models/users.model');
+const Venues = require('../models/venues.model');
 
 /**
  * Retrieves a venue's reviews.
@@ -42,6 +44,72 @@ exports.getLatestReview = async function (req, res) {
                 .send();
         }
     } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+}
+/**
+ * Post a review for a venue.
+ */
+exports.postVenueReview = async function (req, res) {
+    //Extract query params from request
+    let venueId = req.params.id;
+    let token = req.header('X-Authorization');
+    let postReviewRequest = new Reviews.PostReviewRequest(req.body);
+
+    console.log("venueId: " + venueId);
+    console.log("token: " + token);
+
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
+    let sqlForReviewCount = "select count(*) as reviewCount from Review " +
+        "where reviewed_venue_id = ? and review_author_id = ?";
+
+    console.log("sqlByToken: " + sqlByToken);
+    console.log("sqlByVenueId: " + sqlByVenueId);
+    console.log("sqlForReviewCount: " + sqlForReviewCount);
+
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+        const venue = await Venues.getVenueByVenueId(sqlByVenueId, venueId);
+
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }
+
+        //A user cannot review a venue they're admin of
+        if(user.length > 0 && venue.length > 0){
+            if(user[0].userId == venue[0].adminId){
+                res.statusMessage = 'Forbidden';
+                res.status(403)
+                    .send();
+                return;
+            }
+        }
+
+        //nor a venue they have previously reviewed.
+        const reviewCount = await Reviews.reviewCountByUserAndVenue(sqlForReviewCount, venueId, user[0].userId);
+        if(reviewCount == null || reviewCount.reviewCount >= 1){
+            res.statusMessage = 'Forbidden';
+            res.status(403)
+                .send();
+            return;
+        }
+
+        let sqlForReviewRegister = "insert into Review (reviewed_venue_id, " +
+            "review_author_id, review_body, star_rating, cost_rating, time_posted) values (?,?,?,?,?,?)";
+
+        const result = await Reviews.addReview(sqlForReviewRegister, venueId, user[0].userId, postReviewRequest);
+        res.statusMessage = 'Created';
+        res.status(201)
+            .send();
+    }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
         res.status(400)

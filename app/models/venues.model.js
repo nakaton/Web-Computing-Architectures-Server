@@ -101,6 +101,18 @@ exports.getVenues = async function (sql) {
 };
 
 /*
+* Function 'getVenueByVenueId' for View venue by venue id
+*/
+exports.getVenueByVenueId = async function (sql, venueId) {
+    try {
+        return await db.getPool().query(sql, venueId);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
 * Function 'getCategories' for View venues
 */
 exports.getCategories = async function (sql) {
