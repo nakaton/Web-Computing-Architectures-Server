@@ -58,11 +58,25 @@ exports.postUser = async function (sql, registerUserRequest) {
 };
 
 /*
-* Function 'getUser' for Retrieve information about a user.
+* Function 'getUserByUserId' for Retrieve information about a user.
 */
-exports.getUser = async function (sql, userId) {
+exports.getUserByUserId = async function (sql, userId) {
     try {
         let values = [userId];
+
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'getUserByToken' for Retrieve information about a user.
+*/
+exports.getUserByToken = async function (sql, token) {
+    try {
+        let values = [token];
 
         return await db.getPool().query(sql, values);
     } catch (err) {

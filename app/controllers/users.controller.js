@@ -198,20 +198,65 @@ exports.patchUser = async function (req, res) {
     console.log("userId: " + userId);
     console.log("token: " + token);
 
-    let sqlCommand = "select auth_token as token from User where user_id = ?";
+    let sqlByUserId = "select auth_token as token, " +
+        "given_name as giveName, " +
+        "family_name as familyName, " +
+        "password as password " +
+        "from User where user_id = ?";
 
-    console.log("sqlCommand: " + sqlCommand);
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+
+    console.log("sqlByUserId: " + sqlByUserId);
+    console.log("sqlByToken: " + sqlByToken);
 
     try {
-        const results = await Users.getUser(sqlCommand, userId);
-        if (results.length > 0){
-            if(results[0].token == null || results[0].token == ""){
+        const resultsByUserId = await Users.getUserByUserId(sqlByUserId, userId);
+        const resultsByToken = await Users.getUserByToken(sqlByToken, token);
+
+        //should return 403 when valid user data is provided but authenticated as a different user
+        if(resultsByToken[0].userId != userId){
+            res.statusMessage = 'Forbidden';
+            res.status(403)
+                .send();
+            return;
+        }
+
+        //should return 400 when no changes are provided
+        if(resultsByUserId[0].givenName == changeUserDetailsRequest.givenName &&
+        resultsByUserId[0].familyName == changeUserDetailsRequest.familyName &&
+        resultsByUserId[0].password == changeUserDetailsRequest.password){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+            return;
+        }
+
+        //should return 400 when a change of family name is present but has an empty value
+        if(changeUserDetailsRequest.familyName == null || changeUserDetailsRequest.familyName == ""){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+            return;
+        }
+
+        //should return 400 when a change of password is present but has a number value
+        let numberReg = /[0-9]+/;
+        let isNumber = numberReg.test(changeUserDetailsRequest.password);
+        if(isNumber){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+            return;
+        }
+
+        if (resultsByUserId.length > 0){
+            if(resultsByUserId[0].token == null || resultsByUserId[0].token == ""){
                 res.statusMessage = 'Unauthorized';
                 res.status(401)
                     .send();
                 return;
             }
-            if(results[0].token == token){
+            if(resultsByUserId[0].token == token){
                 let updateSql = "update User set given_name = ?, family_name = ?, password = ? " +
                     "where user_id = ?"
                 try{
@@ -227,11 +272,6 @@ exports.patchUser = async function (req, res) {
                         .send();
                     return;
                 }
-            }else{
-                res.statusMessage = 'Forbidden';
-                res.status(403)
-                    .send();
-                return;
             }
         }else{
             res.statusMessage = 'Not Found';
