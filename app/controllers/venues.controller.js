@@ -298,6 +298,77 @@ exports.getVenueById = async function (req, res) {
 };
 
 /**
+ * Change a venue's details.
+ */
+exports.patchVenueById = async function (req, res) {
+    //Extract query params from request
+    let venueId = req.params.id;
+    let token = req.header('X-Authorization');
+    let changeVenueDetailsRequest = new Venues.ChangeVenueDetailsRequest(req.body);
+
+    console.log("venueId: " + venueId);
+    console.log("token: " + token);
+
+    let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+
+    console.log("sqlByVenueId: " + sqlByVenueId);
+    console.log("sqlByToken: " + sqlByToken);
+
+    try {
+        const venue = await Venues.getVenueByVenueId(sqlByVenueId, venueId);
+        const resultsByToken = await Users.getUserByToken(sqlByToken, token);
+
+        if(venue.length <=0 ){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+            return;
+        }else{
+            //Only accessible for the administrator of the venue. Otherwise return 403
+            if (resultsByToken.length > 0) {
+                if(resultsByToken[0].userId != venue[0].adminId){
+                    res.statusMessage = 'Forbidden';
+                    res.status(403)
+                        .send();
+                    return;
+                }
+            }else{
+                res.statusMessage = 'Unauthorized';
+                res.status(401)
+                    .send();
+                return;
+            }
+        }
+
+        let sqlForPatchVenue = "update Venue " +
+            "set venue_name = ?, " +
+            "category_id = ?, " +
+            "city = ?, " +
+            "short_description = ?, " +
+            "long_description = ?, " +
+            "address = ?, " +
+            "latitude = ?, " +
+            "longitude = ? " +
+            "where venue_id = ?";
+
+        await Venues.patchVenue(sqlForPatchVenue, venueId, changeVenueDetailsRequest);
+
+        res.statusMessage = 'OK';
+        res.status(200)
+            .send();
+        return;
+
+    } catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+}
+
+/**
 * Calculate Distance between user and venue
 *
 * @param myLatitude: user's latitude

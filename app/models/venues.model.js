@@ -180,3 +180,24 @@ exports.getVenueById = async function (sql, venueId) {
         throw err;
     }
 };
+
+/*
+* Function 'patchVenue' for patch venues detail
+*/
+exports.patchVenue = async function (sql, venueId, changeVenueDetailsRequest) {
+    try {
+        let values = [changeVenueDetailsRequest.venueName,
+            changeVenueDetailsRequest.categoryId,
+            changeVenueDetailsRequest.city,
+            changeVenueDetailsRequest.shortDescription,
+            changeVenueDetailsRequest.longDescription,
+            changeVenueDetailsRequest.address,
+            changeVenueDetailsRequest.latitude,
+            changeVenueDetailsRequest.longitude,
+            venueId];
+        return await db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};

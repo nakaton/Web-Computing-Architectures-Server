@@ -6,12 +6,14 @@ module.exports = function (app) {
     //Venues
     app.route(app.rootUrl + '/venues')
         .get(venues.getVenues);
-    app.route(app.rootUrl + '/categories')
-        .get(venues.getCategories);
     app.route(app.rootUrl + '/venues')
         .post(venues.postVenue);
     app.route(app.rootUrl + '/venues/:id')
         .get(venues.getVenueById);
+    app.route(app.rootUrl + '/venues/:id')
+        .patch(venues.patchVenueById);
+    app.route(app.rootUrl + '/categories')
+        .get(venues.getCategories);
 
     //Review
     app.route(app.rootUrl + '/venues/:id/reviews')
