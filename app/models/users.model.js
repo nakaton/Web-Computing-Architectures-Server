@@ -30,6 +30,15 @@ exports.LoginSuccessResponse = function LoginSuccessResponse(loginSuccessRespons
 }
 
 /*
+* Model 'ChangeUserDetailsRequest' for Change a user's details.
+*/
+exports.ChangeUserDetailsRequest = function ChangeUserDetailsRequest(changeUserDetailsRequest) {
+    this.givenName = changeUserDetailsRequest.givenName;
+    this.familyName = changeUserDetailsRequest.familyName;
+    this.password = changeUserDetailsRequest.password;
+}
+
+/*
 * Function 'postUser' for Register as a new user.
 */
 exports.postUser = async function (sql, registerUserRequest) {
@@ -108,6 +117,24 @@ exports.checkToken = async function (sqlCommand, token) {
 exports.clearToken = async function (updateTokenSql, userId) {
     try {
         return await db.getPool().query(updateTokenSql, userId);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+};
+
+/*
+* Function 'changeUserDetail' for change user detail
+*/
+exports.changeUserDetail = async function (updateSql, userId, changeUserDetailsRequest) {
+    try {
+        let values = [changeUserDetailsRequest.givenName,
+            changeUserDetailsRequest.familyName,
+            changeUserDetailsRequest.password,
+            userId];
+
+        return await db.getPool().query(updateSql, values);
+
     } catch (err) {
         console.log(err.sql);
         throw err;

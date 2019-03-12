@@ -189,12 +189,14 @@ exports.getUser = async function (req, res) {
 /**
  * Change a user's details.
  */
-exports.updateUser = async function (req, res) {
+exports.patchUser = async function (req, res) {
     //Extract query params from request
     let userId = req.params.id;
     let token = req.header('X-Authorization');
+    let changeUserDetailsRequest = new Users.ChangeUserDetailsRequest(req.body);
 
     console.log("userId: " + userId);
+    console.log("token: " + token);
 
     let sqlCommand = "select auth_token as token from User where user_id = ?";
 
@@ -203,22 +205,45 @@ exports.updateUser = async function (req, res) {
     try {
         const results = await Users.getUser(sqlCommand, userId);
         if (results.length > 0){
-            if(results[0].token == token){
-
-            }else{
+            if(results[0].token == null || results[0].token == ""){
                 res.statusMessage = 'Unauthorized';
                 res.status(401)
                     .send();
+                return;
+            }
+            if(results[0].token == token){
+                let updateSql = "update User set given_name = ?, family_name = ?, password = ? " +
+                    "where user_id = ?"
+                try{
+                    await Users.changeUserDetail(updateSql, userId, changeUserDetailsRequest);
+                    res.statusMessage = 'OK';
+                    res.status(200)
+                        .send();
+                    return;
+                }catch (err) {
+                    if (!err.hasBeenLogged) console.error(err);
+                    res.statusMessage = 'Bad Request';
+                    res.status(400)
+                        .send();
+                    return;
+                }
+            }else{
+                res.statusMessage = 'Forbidden';
+                res.status(403)
+                    .send();
+                return;
             }
         }else{
             res.statusMessage = 'Not Found';
             res.status(404)
                 .send();
+            return;
         }
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
         res.status(400)
             .send();
+        return;
     }
 }
