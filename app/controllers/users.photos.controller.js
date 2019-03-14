@@ -11,8 +11,74 @@ exports.getUsersPhotoById = async function (req, res) {
     //Extract query params from request
     let userId = req.params.id;
     let token = req.header('X-Authorization');
-    let mimeType = req.header('Content-Type'); //either image/png or image/jpeg
+    let path = photoDirectory;
 
+    //Authorise check
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    // Check whether User photo is exist
+    let isUserPhotoExistSql = "select profile_photo_filename as profilePhotoFilename " +
+        "from User where user_id = ?"
+    try{
+        const result = await Users.getUserByUserId(isUserPhotoExistSql, userId);
+        if(result.length <= 0){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+            return;
+        }else{
+            if(result[0].profilePhotoFilename == "" || result[0].profilePhotoFilename == null){
+                res.statusMessage = 'Not Found';
+                res.status(404)
+                    .send();
+                return;
+            }
+            //fs read photo and send response
+            path = path + result[0].profilePhotoFilename; //Full path
+            let contentType = "image/png";
+            let fileExtension = result[0].profilePhotoFilename.split(".")[1];
+
+            if(fileExtension != 'png'){
+                contentType = "image/jpeg";
+            }
+
+            fs.readFile(path,'binary',function(err,  file)  {
+                if  (err)  {
+                    console.log(err);
+                    return;
+                }else{
+                    console.log("photo file output");
+                    res.statusMessage = 'OK';
+                    res.writeHead(200,  {'Content-Type':contentType});
+                    res.write(file,'binary');
+                    res.end();
+                }
+            });
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 }
 
 /**
@@ -24,7 +90,7 @@ exports.setUsersPhoto = async function (req, res) {
     let token = req.header('X-Authorization');
     let mimeType = req.header('Content-Type'); //either image/png or image/jpeg
     let file = req.body;
-    let path = './storage/photos/';
+    let path = photoDirectory;
     let photoFilename = '';
 
     if(mimeType == 'image/jpeg'){

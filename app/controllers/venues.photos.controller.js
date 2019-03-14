@@ -2,6 +2,8 @@ const VenuesPhotos = require('../models/venues.photos.model');
 const Users = require('../models/users.model');
 const fs = require('mz/fs');
 
+const photoDirectory = './storage/photos/';
+
 /**
  * Add a photo to a venue.
  */
@@ -135,7 +137,7 @@ exports.getSpecificVenuePhoto = async function (req, res) {
     let venueId = req.params.id;
     let photoFilename = req.params.photoFilename;
     let token = req.header('X-Authorization');
-    let path = './storage/photos/';
+    let path = photoDirectory;
 
     //Authorise check
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
@@ -209,7 +211,7 @@ exports.deleteSpecificVenuePhoto = async function (req, res) {
     let venueId = req.params.id;
     let photoFilename = req.params.photoFilename;
     let token = req.header('X-Authorization');
-    let path = './storage/photos/';
+    let path = photoDirectory;
     let adminId = "";
 
     // Check whether Venue Photo is exist
