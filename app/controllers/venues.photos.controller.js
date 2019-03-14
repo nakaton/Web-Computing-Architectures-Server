@@ -196,3 +196,91 @@ exports.getSpecificVenuePhoto = async function (req, res) {
         return;
     }
 }
+
+/**
+ * Delete a venue's photo.
+ */
+exports.deleteSpecificVenuePhoto = async function (req, res) {
+    //Extract query params from request
+    let venueId = req.params.id;
+    let photoFilename = req.params.photoFilename;
+    let token = req.header('X-Authorization');
+    let path = './storage/photos/';
+    let adminId = "";
+
+    // Check whether Venue is exist
+    let isVenueExistSql = "select Venue.admin_id as adminId " +
+        "from Venue, VenuePhoto " +
+        "where Venue.venue_id = ? " +
+        "and VenuePhoto.venue_id = Venue.venue_id " +
+        "and VenuePhoto.photo_filename = ?"
+    try{
+        const result = await VenuesPhotos.isVenuePhotoExist(isVenueExistSql, venueId, photoFilename);
+        if(result.length <= 0){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+            return;
+        }else{
+            adminId = result[0].adminId;
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    //Authorise check
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }else{
+            if(adminId != user[0].userId){
+                res.statusMessage = 'Forbidden';
+                res.status(403)
+                    .send();
+                return;
+            }
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    //delete venue photo
+    let deleteVenuePhotoSql = "delete from VenuePhoto where venue_id = ? and photo_filename = ?";
+    const result = await VenuesPhotos.deleteVenuePhoto(deleteVenuePhotoSql, venueId, photoFilename);
+
+    //randomly selected one of its remaining photos to become the new primary photo
+    let isVenuePhotoRemain = "select photo_filename as photoFilename from VenuePhoto where venue_id = ?"
+    const venuesPhotos = await VenuesPhotos.isExistByVenueId(isVenuePhotoRemain, venueId);
+
+    if(venuesPhotos.length > 0){
+        let randomUpdatePrimarySql = "update VenuePhoto set is_primary = '1' where venue_id = ? and photo_filename = ?";
+        const result = await VenuesPhotos.randomUpdatePrimary(randomUpdatePrimarySql,
+            venueId, venuesPhotos[0].photoFilename);
+    }
+
+    //delete physical photo in folder
+    path = path + photoFilename; //Full path
+
+    fs.unlink(path, (err) => {
+        if (err) throw err;
+        console.log('photo deleted');
+        res.statusMessage = 'OK';
+        res.status(200)
+            .send();
+    });
+}

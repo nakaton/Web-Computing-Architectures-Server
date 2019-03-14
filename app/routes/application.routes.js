@@ -48,5 +48,7 @@ module.exports = function (app) {
         .post(venuesPhotos.postVenuesPhoto);
     app.route(app.rootUrl + '/venues/:id/photos/:photoFilename')
         .get(venuesPhotos.getSpecificVenuePhoto);
+    app.route(app.rootUrl + '/venues/:id/photos/:photoFilename')
+        .delete(venuesPhotos.deleteSpecificVenuePhoto);
 
 };

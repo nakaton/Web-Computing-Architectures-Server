@@ -52,3 +52,30 @@ exports.venuePhotoRegister = function (sql, venueId, originalName, description, 
         throw err;
     }
 }
+
+/*
+* Function 'deleteVenuePhoto' for venue photo delete
+*/
+exports.deleteVenuePhoto = function (sql, venueId, photoFilename) {
+    try {
+        let values = [venueId,
+            photoFilename];
+        return db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+}
+
+/*
+* Function 'randomUpdatePrimary' for randomly selected one of its remaining photos to become the new primary photo
+*/
+exports.randomUpdatePrimary = function (sql, venueId, photoFilename) {
+    try {
+        let values = [venueId, photoFilename]
+        return db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+}
