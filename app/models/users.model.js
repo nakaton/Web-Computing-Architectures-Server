@@ -1,5 +1,4 @@
 const db = require('../../config/db');
-const fs = require('mz/fs');
 
 /*
 * Model 'RegisterUserRequest' for View venues request
