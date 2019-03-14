@@ -50,5 +50,7 @@ module.exports = function (app) {
         .get(venuesPhotos.getSpecificVenuePhoto);
     app.route(app.rootUrl + '/venues/:id/photos/:photoFilename')
         .delete(venuesPhotos.deleteSpecificVenuePhoto);
+    app.route(app.rootUrl + '/venues/:id/photos/:photoFilename/setPrimary')
+        .post(venuesPhotos.setPrimary);
 
 };
