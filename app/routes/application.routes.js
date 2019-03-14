@@ -1,6 +1,8 @@
 const venues = require('../controllers/venues.controller');
 const users = require('../controllers/users.controller');
 const review = require('../controllers/reviews.controller');
+const usersPhotos = require('../controllers/users.photos.controller');
+const venuesPhotos = require('../controllers/venues.photos.controller');
 
 module.exports = function (app) {
     //Venues
@@ -34,4 +36,15 @@ module.exports = function (app) {
         .get(users.getUser);
     app.route(app.rootUrl + '/users/:id')
         .patch(users.patchUser);
+
+    //Users.Photos
+    app.route(app.rootUrl + '/users/:id/photo')
+        .get(usersPhotos.getUsersPhotoById);
+    app.route(app.rootUrl + '/users/:id/photo')
+        .put(usersPhotos.setUsersPhoto);
+
+    //Venues.Photos
+    app.route(app.rootUrl + '/venues/:id/photos')
+        .post(venuesPhotos.postVenuesPhoto);
+
 };

@@ -1,5 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const multer  = require('multer');
+
+const photoDirectory = './storage/photos/';
 
 const allowCrossOriginRequests = function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -16,6 +19,8 @@ module.exports = function () {
     app.use(allowCrossOriginRequests);
     app.use(bodyParser.json());
     app.use(bodyParser.raw({ type: 'text/plain' }));  // for the /executeSql endpoint
+    app.use(multer({dest:photoDirectory}).single('photo'));
+    // app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
