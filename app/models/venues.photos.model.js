@@ -25,6 +25,19 @@ exports.isExistByVenueId = function (sql, venueId) {
 }
 
 /*
+* Function 'isVenuePhotoExist' for check whether venue photo exist by venueId and photoFilename
+*/
+exports.isVenuePhotoExist = function (sql, venueId, photoFilename) {
+    try {
+        let values = [venueId, photoFilename]
+        return db.getPool().query(sql, values);
+    } catch (err) {
+        console.log(err.sql);
+        throw err;
+    }
+}
+
+/*
 * Function 'venuePhotoRegister' for venue photo register
 */
 exports.venuePhotoRegister = function (sql, venueId, originalName, description, isPrimary) {
