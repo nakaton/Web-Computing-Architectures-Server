@@ -98,7 +98,7 @@ exports.postVenueReview = async function (req, res) {
 
         //nor a venue they have previously reviewed.
         const reviewCount = await Reviews.reviewCountByUserAndVenue(sqlForReviewCount, venueId, user[0].userId);
-        if(reviewCount == null || reviewCount.reviewCount >= 1){
+        if(reviewCount != null && reviewCount[0].reviewCount > 0){
             res.statusMessage = 'Forbidden';
             res.status(403)
                 .send();
