@@ -101,7 +101,7 @@ exports.setUsersPhoto = async function (req, res) {
         path = path + photoFilename;
     }
 
-    // Check whether user is exist
+    // Check whether user photo is exist
     let isUserExistSql = "select user_id as userId, " +
         "profile_photo_filename as profilePhotoFilename " +
         "from User where user_id = ?"
@@ -174,6 +174,96 @@ exports.setUsersPhoto = async function (req, res) {
             .send();
         return;
 
+    }catch (err) {
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+}
+
+/**
+ * Delete a User's profile photo.
+ */
+exports.deleteUsersPhoto = async function (req, res) {
+    //Extract query params from request
+    let userId = req.params.id;
+    let token = req.header('X-Authorization');
+    let path = photoDirectory;
+    let profilePhotoFilename = '';
+
+    // Check whether user photo is exist
+    let isUserExistSql = "select user_id as userId, " +
+        "profile_photo_filename as profilePhotoFilename " +
+        "from User where user_id = ?"
+    try{
+        const userPhoto = await Users.getUserByUserId(isUserExistSql, userId);
+        if(userPhoto.length <= 0){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+            return;
+        }else{
+            if(userPhoto[0].profilePhotoFilename == null || userPhoto[0].profilePhotoFilename == ""){
+                res.statusMessage = 'Not Found';
+                res.status(404)
+                    .send();
+                return;
+            }else{
+                profilePhotoFilename = userPhoto[0].profilePhotoFilename;
+            }
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    //Authorise check
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+
+        //User authorize check by token
+        if(user.length <= 0){
+            res.statusMessage = 'Unauthorized';
+            res.status(401)
+                .send();
+            return;
+        }else{
+            if(userId != user[0].userId){
+                res.statusMessage = 'Forbidden';
+                res.status(403)
+                    .send();
+                return;
+            }
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    //delete User photo
+    let deleteUserPhotoSql = "update User set profile_photo_filename = ? where user_id = ?";
+    try {
+        const result = await UsersPhotos.updateUserPhoto(deleteUserPhotoSql, null, userId);
+
+        //delete physical photo in folder
+        path = path + profilePhotoFilename; //Full path
+
+        fs.unlink(path, (err) => {
+            if (err) throw err;
+            console.log('photo deleted');
+            res.statusMessage = 'OK';
+            res.status(200)
+                .send();
+        });
     }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
