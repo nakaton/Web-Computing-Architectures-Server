@@ -65,18 +65,6 @@ exports.postVenueReview = async function (req, res) {
     console.log("starRating: " + postReviewRequest.starRating);
     console.log("costRating: " + postReviewRequest.costRating);
 
-    let regexForDecimal = /^\d+\.\d+$/;
-
-    if(postReviewRequest.costRating == null || postReviewRequest.costRating == ""
-        || postReviewRequest.starRating == null || postReviewRequest.starRating == ""
-        || postReviewRequest.starRating > 5 || postReviewRequest.costRating < 0
-        || regexForDecimal.test(postReviewRequest.starRating.toString())
-        || regexForDecimal.test(postReviewRequest.costRating.toString())){
-        res.statusMessage = 'Bad Request';
-        res.status(400)
-            .send();
-    }
-
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
     let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
     let sqlForReviewCount = "select count(*) as reviewCount from Review " +
@@ -115,6 +103,18 @@ exports.postVenueReview = async function (req, res) {
             res.status(403)
                 .send();
             return;
+        }
+
+        let regexForDecimal = /^\d+\.\d+$/;
+
+        if(postReviewRequest.costRating == null || postReviewRequest.costRating == ""
+            || postReviewRequest.starRating == null || postReviewRequest.starRating == ""
+            || postReviewRequest.starRating > 5 || postReviewRequest.costRating < 0
+            || regexForDecimal.test(postReviewRequest.starRating.toString())
+            || regexForDecimal.test(postReviewRequest.costRating.toString())){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
         }
 
         let sqlForReviewRegister = "insert into Review (reviewed_venue_id, " +
