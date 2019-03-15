@@ -67,7 +67,9 @@ exports.postVenueReview = async function (req, res) {
 
     let regexForDecimal = /^\d+\.\d+$/;
 
-    if(postReviewRequest.starRating > 5 || postReviewRequest.costRating < 0
+    if(postReviewRequest.costRating == null || postReviewRequest.costRating == ""
+        || postReviewRequest.starRating == null || postReviewRequest.starRating == ""
+        || postReviewRequest.starRating > 5 || postReviewRequest.costRating < 0
         || regexForDecimal.test(postReviewRequest.starRating.toString())
         || regexForDecimal.test(postReviewRequest.costRating.toString())){
         res.statusMessage = 'Bad Request';
