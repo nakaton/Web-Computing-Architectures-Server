@@ -62,6 +62,18 @@ exports.postVenueReview = async function (req, res) {
 
     console.log("venueId: " + venueId);
     console.log("token: " + token);
+    console.log("starRating: " + postReviewRequest.starRating);
+    console.log("costRating: " + postReviewRequest.costRating);
+
+    let regexForDecimal = /^\d+\.\d+$/;
+
+    if(postReviewRequest.starRating > 5 || postReviewRequest.costRating < 0
+        || regexForDecimal.test(postReviewRequest.starRating.toString())
+        || regexForDecimal.test(postReviewRequest.costRating.toString())){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
 
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
     let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";

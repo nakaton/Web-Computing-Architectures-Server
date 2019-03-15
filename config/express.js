@@ -22,7 +22,6 @@ module.exports = function () {
     app.use(bodyParser.raw({ type: 'image/jpeg', limit: '50mb' }));  // for image/jpeg
     app.use(bodyParser.raw({ type: 'image/png', limit: '50mb' }));  // for image/png
     app.use(multer({dest:photoDirectory}).single('photo'));
-    // app.use(bodyParser.raw({ type: 'application/vnd.custom-type' }));
 
     // ROUTES
     require('../app/routes/backdoor.routes')(app);
