@@ -81,15 +81,7 @@ exports.login = async function (req, res) {
     if(loginRequest.email != undefined){
         sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
         console.log("sqlByEmail: " + sqlByEmail);
-        try{
-            results = await Users.isUserExist(sqlByEmail);
-        }catch (err) {
-            if (!err.hasBeenLogged) console.error(err);
-            res.statusMessage = 'Bad Request';
-            res.status(600)
-                .send();
-            return;
-        }
+        results = await Users.isUserExist(sqlByEmail);
     }
 
     if (loginRequest.username != undefined){
@@ -130,7 +122,7 @@ exports.login = async function (req, res) {
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
-                res.status(800)
+                res.status(results[0].userId)
                     .send();
                 return;
             }
@@ -138,7 +130,7 @@ exports.login = async function (req, res) {
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
-        res.status(700)
+        res.status(400)
             .send();
         return;
     }
