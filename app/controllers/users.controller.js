@@ -169,8 +169,30 @@ exports.logout = async function (req, res) {
 exports.getUser = async function (req, res) {
     //Extract query params from request
     let userId = req.params.id;
+    let token = req.header('X-Authorization');
+    let isEmailAvailable = false;
+    let availableResult = "";
 
     console.log("userId: " + userId);
+
+    //Authorise check
+    let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    try{
+        const user = await Users.getUserByToken(sqlByToken, token);
+
+        //User authorize check by token
+        if(user.length > 0){
+            if(userId == user[0].userId){
+                isEmailAvailable = true;
+            }
+        }
+    }catch (err){
+        if (!err.hasBeenLogged) console.error(err);
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlCommand = "select username as username, " +
         "email as email, " +
@@ -182,9 +204,18 @@ exports.getUser = async function (req, res) {
     try {
         const results = await Users.getUserByUserId(sqlCommand, userId);
         if (results != null && results != ""){
+            if(isEmailAvailable){
+                availableResult = results;
+            }else{
+                availableResult = {
+                    "username": results[0].username,
+                    "givenName":results[0].givenName,
+                    "familyName":results[0].familyName
+                }
+            }
             res.statusMessage = 'OK';
             res.status(200)
-                .json(results);
+                .json(availableResult);
         }else{
             res.statusMessage = 'Not Found';
             res.status(404)
