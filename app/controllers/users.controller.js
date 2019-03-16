@@ -122,7 +122,7 @@ exports.login = async function (req, res) {
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
-                res.status(results[0].userId)
+                res.status(500)
                     .send();
                 return;
             }
