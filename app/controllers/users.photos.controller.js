@@ -69,6 +69,7 @@ exports.getUsersPhotoById = async function (req, res) {
                     res.writeHead(200,  {'Content-Type':contentType});
                     res.write(file,'binary');
                     res.end();
+                    getUsersPhotoById;
                 }
             });
         }
