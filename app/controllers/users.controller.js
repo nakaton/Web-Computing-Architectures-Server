@@ -83,6 +83,7 @@ exports.login = async function (req, res) {
         console.log("sqlByEmail: " + sqlByEmail);
         results = await Users.isUserExist(sqlByEmail);
     }
+
     if (loginRequest.username != null && loginRequest.username != ""){
         sqlByUsername = sqlCommand + " and username = '" + loginRequest.username + "' "
         console.log("sqlByUsername: " + sqlByUsername);
@@ -92,39 +93,31 @@ exports.login = async function (req, res) {
         }
     }
 
-    try {
-        // Input user doesn't exist
-        if(results.length <= 0){
-            res.statusMessage = 'Bad Request';
-            res.status(400)
-                .send();
-            return;
-        }else{
-            //Create token
-            let payload = {
-                username:loginRequest.username,
-                email:loginRequest.email,
-                password:loginRequest.password
-            }
-            let token = jwt.sign(payload, 'jwt', {
-                expiresIn: 60*60*1  // expire in one hour
-            })
-            let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
-
-            await Users.saveToken(saveTokenSql, token, results[0].userId);
-            results[0].token = token;
-            results[0].userId = results[0].userId;
-
-            res.statusMessage = 'OK';
-            res.status(200)
-                .json(results[0]);
-            return;
-        }
-    } catch (err) {
-        if (!err.hasBeenLogged) console.error(err);
+    // Input user doesn't exist
+    if(results.length <= 0){
         res.statusMessage = 'Bad Request';
         res.status(400)
             .send();
+        return;
+    }else{
+        //Create token
+        let payload = {
+            username:loginRequest.username,
+            email:loginRequest.email,
+            password:loginRequest.password
+        }
+        let token = jwt.sign(payload, 'jwt', {
+            expiresIn: 60*60*1  // expire in one hour
+        })
+        let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
+
+        await Users.saveToken(saveTokenSql, token, results[0].userId);
+        results[0].token = token;
+        results[0].userId = results[0].userId;
+
+        res.statusMessage = 'OK';
+        res.status(200)
+            .json(results[0]);
         return;
     }
 }
