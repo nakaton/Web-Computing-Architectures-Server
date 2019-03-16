@@ -271,7 +271,6 @@ exports.deleteUsersPhoto = async function (req, res) {
             res.statusMessage = 'OK';
             res.status(200)
                 .send();
-            getUsersPhotoById;
         });
     }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
