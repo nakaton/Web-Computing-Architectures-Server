@@ -99,7 +99,7 @@ exports.getVenues = async function (req, res) {
             "latitude, " +
             "longitude, " +
             "primaryPhoto " +
-            ";"
+            "limit " + venueSearchRequest.startIndex +",999999;";
     }
 
     console.log("sqlCommand: " + sqlCommand);
