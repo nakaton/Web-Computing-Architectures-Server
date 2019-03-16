@@ -48,6 +48,10 @@ exports.login = async function (req, res) {
         "from User " +
         "where password = '" + loginRequest.password +"'";
 
+    let sqlByUsername = "";
+    let sqlByEmail = "";
+    let results = "";
+
     // Password is necessity. Otherwise return 'Bad Request'
     if(loginRequest.password == null || loginRequest.password == ""){
         res.statusMessage = 'Bad Request';
@@ -57,18 +61,22 @@ exports.login = async function (req, res) {
 
     //Either username or email may be used. Otherwise return 'Bad Request'
     if (loginRequest.username != null && loginRequest.username != ""){
-        sqlCommand += " and username = '" + loginRequest.username + "' "
+        sqlByUsername = sqlCommand + " and username = '" + loginRequest.username + "' "
+        console.log("sqlByUsername: " + sqlByUsername);
+
+        results = await Users.isUserExist(sqlByUsername);
     }
 
     if(loginRequest.email != null && loginRequest.email != ""){
-        sqlCommand += " and email = '" + loginRequest.email + "' "
+        sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
+        console.log("sqlByEmail: " + sqlByEmail);
+
+        if(results.length <= 0){
+            results = await Users.isUserExist(sqlByEmail);
+        }
     }
 
-    console.log("sqlCommand: " + sqlCommand);
-
     try {
-        const results = await Users.isUserExist(sqlCommand);
-
         // Input user doesn't exist
         if(results.length <= 0){
             res.statusMessage = 'Bad Request';
