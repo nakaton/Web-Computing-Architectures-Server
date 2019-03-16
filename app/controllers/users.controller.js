@@ -72,7 +72,7 @@ exports.login = async function (req, res) {
     // Password is necessity. Otherwise return 'Bad Request'
     if(loginRequest.password == null || loginRequest.password == ""){
         res.statusMessage = 'Bad Request';
-        res.status(400)
+        res.status(600)
             .send();
         return;
     }
@@ -96,7 +96,7 @@ exports.login = async function (req, res) {
         // Input user doesn't exist
         if(results.length <= 0){
             res.statusMessage = 'Bad Request';
-            res.status(400)
+            res.status(601)
                 .send();
             return;
         }else{
@@ -122,7 +122,7 @@ exports.login = async function (req, res) {
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
-                res.status(400)
+                res.status(602)
                     .send();
                 return;
             }
@@ -130,7 +130,7 @@ exports.login = async function (req, res) {
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
-        res.status(400)
+        res.status(603)
             .send();
         return;
     }
