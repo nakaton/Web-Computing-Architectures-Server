@@ -264,12 +264,18 @@ exports.getVenueById = async function (req, res) {
             res.statusMessage = 'Not Found';
             res.status(404)
                 .send();
-        }else {
-            let result = [];
+        }else{
+            let venue = new Venues.Venue(venueDetail[0]);
+            let admin = new Venues.Admin(venueDetail[0]);
+            let category = new Venues.VenueCategory(venueDetail[0]);
+
+            admin.userId = admin.userId.toString();
+
+            venue.admin = admin;
+            venue.category = category;
+            venue.photos = [];
+
             venueDetail.forEach(function (item) {
-                let venue = new Venues.Venue(item);
-                let admin = new Venues.Admin(item);
-                let category = new Venues.VenueCategory(item);
                 let photos = new Venues.VenuePhoto(item);
 
                 if(photos.isPrimary == 0){
@@ -277,18 +283,12 @@ exports.getVenueById = async function (req, res) {
                 }else{
                     photos.isPrimary = true;
                 }
-                admin.userId = admin.userId.toString();
-
-                venue.admin = admin;
-                venue.category = category;
-                venue.photos = photos;
-
-                result.push(venue);
+                venue.photos.push(photos);
             });
 
             res.statusMessage = 'OK';
             res.status(200)
-                .json(result);
+                .json(venue);
         }
     }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
