@@ -205,7 +205,12 @@ exports.getUser = async function (req, res) {
         const results = await Users.getUserByUserId(sqlCommand, userId);
         if (results != null && results != ""){
             if(isEmailAvailable){
-                availableResult = results;
+                availableResult = {
+                    "username": results[0].username,
+                    "email":results[0].email,
+                    "givenName":results[0].givenName,
+                    "familyName":results[0].familyName
+                }
             }else{
                 availableResult = {
                     "username": results[0].username,
