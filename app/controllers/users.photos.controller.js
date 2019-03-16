@@ -69,7 +69,6 @@ exports.getUsersPhotoById = async function (req, res) {
                     res.writeHead(200,  {'Content-Type':contentType});
                     res.write(file,'binary');
                     res.end();
-                    getUsersPhotoById;
                 }
             });
         }
@@ -272,6 +271,7 @@ exports.deleteUsersPhoto = async function (req, res) {
             res.statusMessage = 'OK';
             res.status(200)
                 .send();
+            getUsersPhotoById;
         });
     }catch (err) {
         if (!err.hasBeenLogged) console.error(err);
