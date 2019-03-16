@@ -70,12 +70,36 @@ exports.getVenues = async function (req, res) {
     // Define the starting record and number of items to include
     if (venueSearchRequest.count != undefined) {
         if (venueSearchRequest.startIndex != undefined) {
-            sqlCommand += " limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
+            sqlCommand += " group by venueId, " +
+                "venueName, " +
+                "categoryId, " +
+                "city, " +
+                "shortDescription, " +
+                "latitude, " +
+                "longitude, " +
+                "primaryPhoto " +
+                "limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
         } else {
-            sqlCommand += " limit 0," + venueSearchRequest.count + ";";
+            sqlCommand += " group by venueId, " +
+                "venueName, " +
+                "categoryId, " +
+                "city, " +
+                "shortDescription, " +
+                "latitude, " +
+                "longitude, " +
+                "primaryPhoto " +
+                "limit 0," + venueSearchRequest.count + ";";
         }
     }else{
-        sqlCommand += ";"
+        sqlCommand += " group by venueId, " +
+            "venueName, " +
+            "categoryId, " +
+            "city, " +
+            "shortDescription, " +
+            "latitude, " +
+            "longitude, " +
+            "primaryPhoto " +
+            ";"
     }
 
     console.log("sqlCommand: " + sqlCommand);
