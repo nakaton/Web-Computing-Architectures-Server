@@ -269,8 +269,6 @@ exports.getVenueById = async function (req, res) {
             let admin = new Venues.Admin(venueDetail[0]);
             let category = new Venues.VenueCategory(venueDetail[0]);
 
-            admin.userId = admin.userId.toString();
-
             venue.admin = admin;
             venue.category = category;
             venue.photos = [];
