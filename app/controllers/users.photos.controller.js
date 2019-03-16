@@ -92,6 +92,7 @@ exports.setUsersPhoto = async function (req, res) {
     let file = req.body;
     let path = photoDirectory;
     let photoFilename = '';
+    let isOldPhotoExist = false;
 
     if(mimeType == 'image/jpeg'){
         photoFilename = 'user_' + userId + '.jpeg';
@@ -120,6 +121,7 @@ exports.setUsersPhoto = async function (req, res) {
                     if (err) throw err;
                     console.log('old photo deleted');
                 });
+                isOldPhotoExist = true;
             }
         }
     }catch (err){
@@ -169,9 +171,15 @@ exports.setUsersPhoto = async function (req, res) {
 
     try {
         const result = await UsersPhotos.updateUserPhoto(updateUserPhotoSql, photoFilename, userId);
-        res.statusMessage = 'OK';
-        res.status(200)
-            .send();
+        if(isOldPhotoExist){
+            res.statusMessage = 'OK';
+            res.status(200)
+                .send();
+        }else{
+            res.statusMessage = 'Created';
+            res.status(201)
+                .send();
+        }
         return;
 
     }catch (err) {
