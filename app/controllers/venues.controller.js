@@ -49,7 +49,7 @@ exports.getVenues = async function (req, res) {
 
     //Add city as a condition
     if(venueSearchRequest.city != undefined){
-        sqlCommand += " and Venue.city = " + venueSearchRequest.city
+        sqlCommand += " and Venue.city = '" + venueSearchRequest.city + "'"
     }
 
     //Add q as a condition
@@ -83,65 +83,71 @@ exports.getVenues = async function (req, res) {
     try {
         let results = await Venues.getVenues(sqlCommand);
 
-        //Only include Venues that have an average (mean) star rating >= minStarRating.
-        if(venueSearchRequest.minStarRating != undefined){
-            for(let i = 0; i < results.length; i++) {
-                if(results[i].avgStarRating != null && results[i].avgStarRating != ""
-                    && results[i].avgStarRating < venueSearchRequest.minStarRating) {
-                    results.splice(i, 1);
+        if(results.length > 0 && results[0].venueId != null){
+            //Only include Venues that have an average (mean) star rating >= minStarRating.
+            if(venueSearchRequest.minStarRating != undefined){
+                for(let i = 0; i < results.length; i++) {
+                    if(results[i].avgStarRating != null && results[i].avgStarRating != ""
+                        && results[i].avgStarRating < venueSearchRequest.minStarRating) {
+                        results.splice(i, 1);
+                    }
                 }
             }
-        }
 
-        //Only include Venues that have an average (mode) cost rating <= maxCostRating.
-        if(venueSearchRequest.maxCostRating != undefined){
-            for(let i = 0; i < results.length; i++) {
-                if(results[i].avgCostRating != null && results[i].avgCostRating != ""
-                    && results[i].avgCostRating > venueSearchRequest.minStarRating) {
-                    results.splice(i, 1);
+            //Only include Venues that have an average (mode) cost rating <= maxCostRating.
+            if(venueSearchRequest.maxCostRating != undefined){
+                for(let i = 0; i < results.length; i++) {
+                    if(results[i].avgCostRating != null && results[i].avgCostRating != ""
+                        && results[i].avgCostRating > venueSearchRequest.minStarRating) {
+                        results.splice(i, 1);
+                    }
                 }
             }
-        }
 
-        //The distance field only included in the results
-        //when myLatitude and myLongitude parameters are provided.
-        if(venueSearchRequest.myLatitude != undefined && venueSearchRequest.myLongitude != undefined){
-            results.forEach(function (item) {
-                let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
-                    item.latitude, item.longitude);
+            //The distance field only included in the results
+            //when myLatitude and myLongitude parameters are provided.
+            if(venueSearchRequest.myLatitude != undefined && venueSearchRequest.myLongitude != undefined){
+                results.forEach(function (item) {
+                    let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
+                        item.latitude, item.longitude);
 
-                item.distance = distance;
-            });
+                    item.distance = distance;
+                });
+            }else{
+                results.forEach(function (item) {
+                    item.distance = "";
+                });
+            }
+
+            //Sort By key columns and reverseSort
+            if(venueSearchRequest.sortBy == undefined){
+                keySort('meanStarRating', venueSearchRequest.reverseSort);
+            }else{
+                let keyArr = venueSearchRequest.sortBy.split(",");
+                keyArr.forEach(function (key) {
+                    console.log(key.trim());
+                    switch (key.trim()) {
+                        case 'STAR_RATING':
+                            results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                            break;
+                        case 'COST_RATING':
+                            results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                            break;
+                        case 'DISTANCE':
+                            results.sort(keySort('distance', venueSearchRequest.reverseSort));
+                            break;
+                    }
+                })
+            }
+
+            res.statusMessage = 'OK';
+            res.status(200)
+                .json(results);
         }else{
-            results.forEach(function (item) {
-                item.distance = "";
-            });
+            res.statusMessage = 'OK';
+            res.status(200)
+                .send([]);
         }
-
-        //Sort By key columns and reverseSort
-        if(venueSearchRequest.sortBy == undefined){
-            keySort('meanStarRating', venueSearchRequest.reverseSort);
-        }else{
-            let keyArr = venueSearchRequest.sortBy.split(",");
-            keyArr.forEach(function (key) {
-                console.log(key.trim());
-                switch (key.trim()) {
-                    case 'STAR_RATING':
-                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
-                        break;
-                    case 'COST_RATING':
-                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
-                        break;
-                    case 'DISTANCE':
-                        results.sort(keySort('distance', venueSearchRequest.reverseSort));
-                        break;
-                }
-            })
-        }
-
-        res.statusMessage = 'OK';
-        res.status(200)
-            .json(results);
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
