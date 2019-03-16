@@ -101,12 +101,18 @@ exports.login = async function (req, res) {
         }else{
             //Create token
             let payload = {
+                username:loginRequest.username,
+                email:loginRequest.email,
                 password:loginRequest.password
             }
 
             let token = jwt.sign(payload, 'jwt', {
                 expiresIn: 60*60*1  // expire in one hour
             })
+
+            let tokenCrypto = crypto.createHash('md5');
+            tokenCrypto.update(token);
+            token = tokenCrypto.digest('hex');
 
             let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
             try{
@@ -120,7 +126,7 @@ exports.login = async function (req, res) {
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
-                res.status(500)
+                res.status(400)
                     .send();
                 return;
             }
