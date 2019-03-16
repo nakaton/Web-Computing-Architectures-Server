@@ -107,17 +107,11 @@ exports.login = async function (req, res) {
                 email:loginRequest.email,
                 password:loginRequest.password
             }
-            try{
-                let token = jwt.sign(payload, 'jwt', {
-                    expiresIn: 60*60*1  // expire in one hour
-                })
-            }catch (err) {
-                if (!err.hasBeenLogged) console.error(err);
-                res.statusMessage = 'Bad Request';
-                res.status(501)
-                    .send();
-                return;
-            }
+
+            let token = jwt.sign(payload, 'jwt', {
+                expiresIn: 60*60*1  // expire in one hour
+            })
+
             let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
             try{
                 await Users.saveToken(saveTokenSql, token, results[0].userId);
