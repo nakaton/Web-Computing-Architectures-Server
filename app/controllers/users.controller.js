@@ -57,6 +57,7 @@ exports.login = async function (req, res) {
         res.statusMessage = 'Bad Request';
         res.status(400)
             .send();
+        return;
     }
 
     //Either username or email may be used. Otherwise return 'Bad Request'
@@ -82,6 +83,7 @@ exports.login = async function (req, res) {
             res.statusMessage = 'Bad Request';
             res.status(400)
                 .send();
+            return;
         }else{
             //Create token
             let payload = {
@@ -96,15 +98,18 @@ exports.login = async function (req, res) {
             try{
                 await Users.saveToken(saveTokenSql, token, results[0].userId);
                 results[0].token = token;
+                results[0].userId = results[0].userId.toString();
 
                 res.statusMessage = 'OK';
                 res.status(200)
                     .json(results);
+                return;
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
                 res.status(400)
                     .send();
+                return;
             }
         }
     } catch (err) {
@@ -112,6 +117,7 @@ exports.login = async function (req, res) {
         res.statusMessage = 'Bad Request';
         res.status(400)
             .send();
+        return;
     }
 }
 
