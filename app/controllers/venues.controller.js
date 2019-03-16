@@ -277,6 +277,7 @@ exports.getVenueById = async function (req, res) {
                 }else{
                     photos.isPrimary = true;
                 }
+                admin.userId = admin.userId.toString();
 
                 venue.admin = admin;
                 venue.category = category;
