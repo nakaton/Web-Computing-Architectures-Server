@@ -68,39 +68,21 @@ exports.getVenues = async function (req, res) {
     }
 
     // Define the starting record and number of items to include
-    if (venueSearchRequest.count != undefined) {
-        if (venueSearchRequest.startIndex != undefined) {
-            sqlCommand += " group by venueId, " +
-                "venueName, " +
-                "categoryId, " +
-                "city, " +
-                "shortDescription, " +
-                "latitude, " +
-                "longitude, " +
-                "primaryPhoto " +
-                "limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
-        } else {
-            sqlCommand += " group by venueId, " +
-                "venueName, " +
-                "categoryId, " +
-                "city, " +
-                "shortDescription, " +
-                "latitude, " +
-                "longitude, " +
-                "primaryPhoto " +
-                "limit 0," + venueSearchRequest.count + ";";
-        }
-    }else{
-        sqlCommand += " group by venueId, " +
-            "venueName, " +
-            "categoryId, " +
-            "city, " +
-            "shortDescription, " +
-            "latitude, " +
-            "longitude, " +
-            "primaryPhoto " +
-            "limit " + venueSearchRequest.startIndex +",999999;";
+    if (venueSearchRequest.count == undefined) {
+        venueSearchRequest.count = 999999;
     }
+    if(venueSearchRequest.startIndex == undefined) {
+        venueSearchRequest.startIndex = 0;
+    }
+    sqlCommand += " group by venueId, " +
+        "venueName, " +
+        "categoryId, " +
+        "city, " +
+        "shortDescription, " +
+        "latitude, " +
+        "longitude, " +
+        "primaryPhoto " +
+        "limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
 
     console.log("sqlCommand: " + sqlCommand);
 
