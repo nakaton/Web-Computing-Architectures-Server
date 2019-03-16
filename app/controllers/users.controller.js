@@ -46,7 +46,7 @@ exports.postUser = async function (req, res) {
 }
 
 /**
- * Login as an existing user.
+ * Login as an existing user..
  */
 exports.login = async function (req, res) {
     //Extract query params from request into LoginRequest
