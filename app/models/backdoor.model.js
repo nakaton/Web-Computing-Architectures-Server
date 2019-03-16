@@ -1,5 +1,6 @@
 const db = require('../../config/db');
 const fs = require('mz/fs');
+const crypto = require('crypto');
 
 const photoDirectory = './storage/photos/';
 
@@ -59,6 +60,9 @@ async function populateDefaultUsers() {
 async function changePasswordToHash(user, passwordIndex) {
     // TODO you need to implement "passwords.hash()" yourself, then uncomment the line below.
     // user[passwordIndex] = await passwords.hash(user[passwordIndex]);
+    let md5 = crypto.createHash('md5');
+    md5.update(user[passwordIndex]);
+    user[passwordIndex] = md5.digest('hex');
 
     // It is recommended you use a reputable cryptology library to do the actual hashing/comparing for you...
 }
