@@ -13,25 +13,25 @@ exports.getUsersPhotoById = async function (req, res) {
     let token = req.header('X-Authorization');
     let path = photoDirectory;
 
-    //Authorise check
-    let sqlByToken = "select user_id as userId from User where auth_token = ?";
-    try{
-        const user = await Users.getUserByToken(sqlByToken, token);
-
-        //User authorize check by token
-        if(user.length <= 0){
-            res.statusMessage = 'Unauthorized';
-            res.status(401)
-                .send();
-            return;
-        }
-    }catch (err){
-        if (!err.hasBeenLogged) console.error(err);
-        res.statusMessage = 'Bad Request';
-        res.status(400)
-            .send();
-        return;
-    }
+    // //Authorise check
+    // let sqlByToken = "select user_id as userId from User where auth_token = ?";
+    // try{
+    //     const user = await Users.getUserByToken(sqlByToken, token);
+    //
+    //     //User authorize check by token
+    //     if(user.length <= 0){
+    //         res.statusMessage = 'Unauthorized';
+    //         res.status(401)
+    //             .send();
+    //         return;
+    //     }
+    // }catch (err){
+    //     if (!err.hasBeenLogged) console.error(err);
+    //     res.statusMessage = 'Bad Request';
+    //     res.status(400)
+    //         .send();
+    //     return;
+    // }
 
     // Check whether User photo is exist
     let isUserPhotoExistSql = "select profile_photo_filename as profilePhotoFilename " +
