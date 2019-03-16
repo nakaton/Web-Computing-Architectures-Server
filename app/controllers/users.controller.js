@@ -78,13 +78,13 @@ exports.login = async function (req, res) {
     let results = "";
 
     //Either username or email may be used. Otherwise return 'Bad Request'
-    if(loginRequest.email != null && loginRequest.email != ""){
+    if(loginRequest.email != undefined){
         sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
         console.log("sqlByEmail: " + sqlByEmail);
         results = await Users.isUserExist(sqlByEmail);
     }
 
-    if (loginRequest.username != null && loginRequest.username != ""){
+    if (loginRequest.username != undefined){
         sqlByUsername = sqlCommand + " and username = '" + loginRequest.username + "' "
         console.log("sqlByUsername: " + sqlByUsername);
 
@@ -103,9 +103,9 @@ exports.login = async function (req, res) {
         }else{
             //Create token
             let payload = {
-                username:loginRequest.username,
-                email:loginRequest.email,
-                password:loginRequest.password
+                "username":loginRequest.username,
+                "email":loginRequest.email,
+                "password":loginRequest.password
             }
             let token = jwt.sign(payload, 'jwt', {
                 expiresIn: 60*60*1  // expire in one hour
