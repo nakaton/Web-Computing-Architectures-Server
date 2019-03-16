@@ -29,10 +29,9 @@ exports.getVenues = async function (req, res) {
         "Venue.short_description as shortDescription," +
         "Venue.latitude as latitude," +
         "Venue.longitude as longitude," +
-        "Review.star_rating as meanStarRating," +
-        "Review.cost_rating as modeCostRating," +
+        "AVG(Review.star_rating)  as avgStarRating," +
+        "AVG(Review.cost_rating)  as avgCostRating," +
         "VenuePhoto.photo_filename as primaryPhoto " +
-        //"venue.distance" +
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
         "left join Review on Venue.venue_id = Review.reviewed_venue_id " +
@@ -40,38 +39,28 @@ exports.getVenues = async function (req, res) {
         "where 1=1 ";
 
     //Add city as a condition
-    if(venueSearchRequest.city != null && venueSearchRequest.city != ""){
+    if(venueSearchRequest.city != undefined){
         sqlCommand += " and Venue.city = " + venueSearchRequest.city
     }
 
     //Add q as a condition
-    if(venueSearchRequest.q != null && venueSearchRequest.q != ""){
+    if(venueSearchRequest.q != undefined){
         sqlCommand += " and Venue.venue_name like '%" + venueSearchRequest.q + "%'"
     }
 
     //Add categoryId as a condition
-    if(venueSearchRequest.categoryId != null && venueSearchRequest.categoryId != ""){
-        sqlCommand += " and Venue.category_id =" + venueSearchRequest.categoryId
-    }
-
-    //Add minStarRating as a condition
-    if(venueSearchRequest.minStarRating != null && venueSearchRequest.minStarRating != ""){
-        sqlCommand += " and Review.star_rating >=" + venueSearchRequest.minStarRating
-    }
-
-    //Add maxCostRating as a condition
-    if(venueSearchRequest.maxCostRating != null && venueSearchRequest.maxCostRating != ""){
-        sqlCommand += " and Review.cost_rating <=" + venueSearchRequest.maxCostRating
+    if(venueSearchRequest.categoryId != undefined){
+        sqlCommand += " and Venue.category_id = " + venueSearchRequest.categoryId
     }
 
     //Add adminId as a condition
-    if(venueSearchRequest.adminId != null && venueSearchRequest.adminId != ""){
-        sqlCommand += " and Venue.admin_id >=" + venueSearchRequest.adminId
+    if(venueSearchRequest.adminId != undefined){
+        sqlCommand += " and Venue.admin_id = " + venueSearchRequest.adminId
     }
 
     // Define the starting record and number of items to include
-    if (venueSearchRequest.count != null) {
-        if (venueSearchRequest.startIndex != null) {
+    if (venueSearchRequest.count != undefined) {
+        if (venueSearchRequest.startIndex != undefined) {
             sqlCommand += " limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
         } else {
             sqlCommand += " limit 0," + venueSearchRequest.count + ";";
@@ -83,12 +72,33 @@ exports.getVenues = async function (req, res) {
     console.log("sqlCommand: " + sqlCommand);
 
     try {
-        const results = await Venues.getVenues(sqlCommand);
+        let results = await Venues.getVenues(sqlCommand);
+        let filterResult1 = [];
+        let filterResult2 = [];
+
+        //Only include Venues that have an average (mean) star rating >= minStarRating.
+        if(venueSearchRequest.minStarRating != undefined){
+            results.forEach(function (item) {
+                if(item.avgStarRating >= venueSearchRequest.minStarRating){
+                    filterResult1.push(item);
+                }
+            });
+        }
+
+        //Only include Venues that have an average (mode) cost rating <= maxCostRating.
+        if(venueSearchRequest.maxCostRating != undefined){
+            filterResult1.forEach(function (item) {
+                if(item.avgCostRating <= venueSearchRequest.minStarRating){
+                    filterResult2.push(item);
+                }
+            });
+        }
+
+        results = filterResult2;
 
         //The distance field only included in the results
         //when myLatitude and myLongitude parameters are provided.
-        if(venueSearchRequest.myLatitude != null && venueSearchRequest.myLatitude != ""
-            && venueSearchRequest.myLongitude != null && venueSearchRequest.myLongitude != ""){
+        if(venueSearchRequest.myLatitude != undefined && venueSearchRequest.myLongitude != undefined){
             results.forEach(function (item) {
                 let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
                     item.latitude, item.longitude);
@@ -102,7 +112,7 @@ exports.getVenues = async function (req, res) {
         }
 
         //Sort By key columns and reverseSort
-        if(venueSearchRequest.sortBy == null || venueSearchRequest.sortBy == ""){
+        if(venueSearchRequest.sortBy == undefined){
             keySort('meanStarRating', venueSearchRequest.reverseSort);
         }else{
             let keyArr = venueSearchRequest.sortBy.split(",");
