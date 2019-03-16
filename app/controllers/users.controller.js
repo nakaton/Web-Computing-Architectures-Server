@@ -103,8 +103,6 @@ exports.login = async function (req, res) {
         }else{
             //Create token
             let payload = {
-                username:loginRequest.username,
-                email:loginRequest.email,
                 password:loginRequest.password
             }
 
