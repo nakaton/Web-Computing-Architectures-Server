@@ -14,6 +14,14 @@ exports.postUser = async function (req, res) {
     console.log("familyName: " + registerUserRequest.familyName);
     console.log("password: " + registerUserRequest.password);
 
+    let regexForEmail = /^\w+@[a-zA-Z0-9]{2,10}(?:\.[a-z]{2,4}){1,3}$/;
+    if(!regexForEmail.test(registerUserRequest.email)
+        || (registerUserRequest.password != null && registerUserRequest.password == "")){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+    }
+
     let sqlCommand = "insert into User (username, email, given_name, family_name, password) values (?,?,?,?,?)";
 
     console.log("sqlCommand: " + sqlCommand);
