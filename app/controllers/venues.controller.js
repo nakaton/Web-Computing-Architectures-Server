@@ -73,28 +73,26 @@ exports.getVenues = async function (req, res) {
 
     try {
         let results = await Venues.getVenues(sqlCommand);
-        let filterResult1 = [];
-        let filterResult2 = [];
 
         //Only include Venues that have an average (mean) star rating >= minStarRating.
         if(venueSearchRequest.minStarRating != undefined){
-            results.forEach(function (item) {
-                if(item.avgStarRating >= venueSearchRequest.minStarRating){
-                    filterResult1.push(item);
+            for(let i = 0; i < results.length; i++) {
+                if(results[i].avgStarRating != null && results[i].avgStarRating != ""
+                    && results[i].avgStarRating < venueSearchRequest.minStarRating) {
+                    results.splice(i, 1);
                 }
-            });
+            }
         }
 
         //Only include Venues that have an average (mode) cost rating <= maxCostRating.
         if(venueSearchRequest.maxCostRating != undefined){
-            filterResult1.forEach(function (item) {
-                if(item.avgCostRating <= venueSearchRequest.minStarRating){
-                    filterResult2.push(item);
+            for(let i = 0; i < results.length; i++) {
+                if(results[i].avgCostRating != null && results[i].avgCostRating != ""
+                    && results[i].avgCostRating > venueSearchRequest.minStarRating) {
+                    results.splice(i, 1);
                 }
-            });
+            }
         }
-
-        results = filterResult2;
 
         //The distance field only included in the results
         //when myLatitude and myLongitude parameters are provided.
