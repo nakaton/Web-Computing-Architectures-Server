@@ -16,11 +16,20 @@ exports.getVenues = async function (req, res) {
     console.log('q: ' + venueSearchRequest.q);
     console.log('categoryId: ' + venueSearchRequest.categoryId);
     console.log('minStarRating: ' + venueSearchRequest.minStarRating);
+    console.log('maxCostRating: ' + venueSearchRequest.maxCostRating);
     console.log('adminId: ' + venueSearchRequest.adminId);
     console.log('sortBy: ' + venueSearchRequest.sortBy);
     console.log('reverseSort: ' + venueSearchRequest.reverseSort);
     console.log('myLatitude: ' + venueSearchRequest.myLatitude);
     console.log('myLongitude: ' + venueSearchRequest.myLongitude);
+
+    if((venueSearchRequest.minStarRating != undefined && venueSearchRequest.minStarRating > 5)
+        || (venueSearchRequest.maxCostRating != undefined && venueSearchRequest.maxCostRating < 0)){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlCommand = "select Venue.venue_id as venueId," +
         "Venue.venue_name as venueName," +
