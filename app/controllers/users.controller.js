@@ -103,7 +103,7 @@ exports.login = async function (req, res) {
             //Create token
             let payload = {
                 username:loginRequest.username,
-                email:loginRequest.username,
+                email:loginRequest.email,
                 password:loginRequest.password
             }
             let token = jwt.sign(payload, 'jwt', {
