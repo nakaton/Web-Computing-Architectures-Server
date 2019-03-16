@@ -57,13 +57,11 @@ exports.login = async function (req, res) {
 
     //Either username or email may be used. Otherwise return 'Bad Request'
     if (loginRequest.username != null && loginRequest.username != ""){
-        sqlCommand += " and username = '" + loginRequest.username + "';"
-    }else if(loginRequest.email != null && loginRequest.email != ""){
-        sqlCommand += " and email = '" + loginRequest.email + "';"
-    }else {
-        res.statusMessage = 'Bad Request';
-        res.status(400)
-            .send();
+        sqlCommand += " and username = '" + loginRequest.username + "' "
+    }
+
+    if(loginRequest.email != null && loginRequest.email != ""){
+        sqlCommand += " and email = '" + loginRequest.email + "' "
     }
 
     console.log("sqlCommand: " + sqlCommand);
@@ -73,7 +71,7 @@ exports.login = async function (req, res) {
 
         // Input user doesn't exist
         if(results.length <= 0){
-            res.statusMessage = 'User not exist';
+            res.statusMessage = 'Bad Request';
             res.status(400)
                 .send();
         }else{
