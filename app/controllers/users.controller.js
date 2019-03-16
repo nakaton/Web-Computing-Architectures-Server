@@ -115,11 +115,11 @@ exports.login = async function (req, res) {
             try{
                 await Users.saveToken(saveTokenSql, token, results[0].userId);
                 results[0].token = token;
-                results[0].userId = results[0].userId.toString();
+                results[0].userId = results[0].userId;
 
                 res.statusMessage = 'OK';
                 res.status(200)
-                    .json(results);
+                    .json(results[0]);
                 return;
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
