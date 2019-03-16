@@ -1,5 +1,6 @@
 const Users = require('../models/users.model');
 const jwt = require('jsonwebtoken'); // use for create token
+const crypto = require('crypto');
 
 /**
  * Register as a new user.
@@ -21,6 +22,10 @@ exports.postUser = async function (req, res) {
         res.status(400)
             .send();
     }
+
+    let md5 = crypto.createHash('md5');
+    md5.update(registerUserRequest.password);
+    registerUserRequest.password = md5.digest('hex');
 
     let sqlCommand = "insert into User (username, email, given_name, family_name, password) values (?,?,?,?,?)";
 
@@ -50,6 +55,10 @@ exports.login = async function (req, res) {
     console.log("username: " + loginRequest.username);
     console.log("email: " + loginRequest.email);
     console.log("password: " + loginRequest.password);
+
+    let md5 = crypto.createHash('md5');
+    md5.update(loginRequest.password);
+    loginRequest.password = md5.digest('hex');
 
     let sqlCommand = "select user_id as userId, " +
         "auth_token as token " +
