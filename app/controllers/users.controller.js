@@ -78,19 +78,17 @@ exports.login = async function (req, res) {
     }
 
     //Either username or email may be used. Otherwise return 'Bad Request'
+    if(loginRequest.email != null && loginRequest.email != ""){
+        sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
+        console.log("sqlByEmail: " + sqlByEmail);
+        results = await Users.isUserExist(sqlByEmail);
+    }
     if (loginRequest.username != null && loginRequest.username != ""){
         sqlByUsername = sqlCommand + " and username = '" + loginRequest.username + "' "
         console.log("sqlByUsername: " + sqlByUsername);
 
-        results = await Users.isUserExist(sqlByUsername);
-    }
-
-    if(loginRequest.email != null && loginRequest.email != ""){
-        sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
-        console.log("sqlByEmail: " + sqlByEmail);
-
         if(results.length <= 0){
-            results = await Users.isUserExist(sqlByEmail);
+            results = await Users.isUserExist(sqlByUsername);
         }
     }
 
