@@ -81,7 +81,15 @@ exports.login = async function (req, res) {
     if(loginRequest.email != undefined){
         sqlByEmail = sqlCommand + " and email = '" + loginRequest.email + "' "
         console.log("sqlByEmail: " + sqlByEmail);
-        results = await Users.isUserExist(sqlByEmail);
+        try{
+            results = await Users.isUserExist(sqlByEmail);
+        }catch (err) {
+            if (!err.hasBeenLogged) console.error(err);
+            res.statusMessage = 'Bad Request';
+            res.status(600)
+                .send();
+            return;
+        }
     }
 
     if (loginRequest.username != undefined){
@@ -103,9 +111,9 @@ exports.login = async function (req, res) {
         }else{
             //Create token
             let payload = {
-                "username":loginRequest.username,
-                "email":loginRequest.email,
-                "password":loginRequest.password
+                username:loginRequest.username,
+                email:loginRequest.email,
+                password:loginRequest.password
             }
             let token = jwt.sign(payload, 'jwt', {
                 expiresIn: 60*60*1  // expire in one hour
@@ -122,7 +130,7 @@ exports.login = async function (req, res) {
             }catch (err) {
                 if (!err.hasBeenLogged) console.error(err);
                 res.statusMessage = 'Bad Request';
-                res.status(results[0].userId)
+                res.status(800)
                     .send();
                 return;
             }
@@ -130,7 +138,7 @@ exports.login = async function (req, res) {
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
-        res.status(results[0].userId)
+        res.status(700)
             .send();
         return;
     }
