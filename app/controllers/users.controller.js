@@ -72,7 +72,7 @@ exports.login = async function (req, res) {
     // Password is necessity. Otherwise return 'Bad Request'
     if(loginRequest.password == null || loginRequest.password == ""){
         res.statusMessage = 'Bad Request';
-        res.status(600)
+        res.status(400)
             .send();
         return;
     }
@@ -96,7 +96,7 @@ exports.login = async function (req, res) {
         // Input user doesn't exist
         if(results.length <= 0){
             res.statusMessage = 'Bad Request';
-            res.status(601)
+            res.status(400)
                 .send();
             return;
         }else{
@@ -110,27 +110,20 @@ exports.login = async function (req, res) {
                 expiresIn: 60*60*1  // expire in one hour
             })
             let saveTokenSql = "update User set auth_token = ? where user_id = ?;"
-            try{
-                await Users.saveToken(saveTokenSql, token, results[0].userId);
-                results[0].token = token;
-                results[0].userId = results[0].userId;
 
-                res.statusMessage = 'OK';
-                res.status(200)
-                    .json(results[0]);
-                return;
-            }catch (err) {
-                if (!err.hasBeenLogged) console.error(err);
-                res.statusMessage = 'Bad Request';
-                res.status(602)
-                    .send();
-                return;
-            }
+            await Users.saveToken(saveTokenSql, token, results[0].userId);
+            results[0].token = token;
+            results[0].userId = results[0].userId;
+
+            res.statusMessage = 'OK';
+            res.status(200)
+                .json(results[0]);
+            return;
         }
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
-        res.status(603)
+        res.status(400)
             .send();
         return;
     }
