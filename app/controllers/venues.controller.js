@@ -68,10 +68,10 @@ exports.getVenues = async function (req, res) {
     }
 
     // Define the starting record and number of items to include
-    if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
+    if (venueSearchRequest.count == undefined) {
         venueSearchRequest.count = 999999;
     }
-    if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
+    if(venueSearchRequest.startIndex == undefined) {
         venueSearchRequest.startIndex = 0;
     }
     sqlCommand += " group by venueId, " +
