@@ -44,7 +44,7 @@ exports.getVenues = async function (req, res) {
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
         "left join Review on Venue.venue_id = Review.reviewed_venue_id " +
-        "left join VenuePhoto on Venue.venue_id = VenuePhoto.venue_id " +
+        "left join VenuePhoto on Venue.venue_id = VenuePhoto.venue_id and VenuePhoto.is_primary = '1' " +
         "where 1=1 ";
 
     //Add city as a condition
