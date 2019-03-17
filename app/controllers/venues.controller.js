@@ -132,7 +132,18 @@ exports.getVenues = async function (req, res) {
             });
         }
 
-        // //Sort By key columns and reverseSort
+        if(venueSearchRequest.reverseSort == undefined || venueSearchRequest.reverseSort == null || venueSearchRequest.reverseSort == ""){
+            venueSearchRequest.reverseSort = false;
+        }else{
+            if(venueSearchRequest.reverseSort == "false"){
+                venueSearchRequest.reverseSort = false;
+            }
+            if(venueSearchRequest.reverseSort == "true"){
+                venueSearchRequest.reverseSort = true;
+            }
+        }
+
+        //Sort By key columns and reverseSort
         if(venueSearchRequest.sortBy == undefined
             || venueSearchRequest.sortBy == null
             || venueSearchRequest.sortBy == ""){
