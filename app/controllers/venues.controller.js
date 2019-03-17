@@ -144,17 +144,17 @@ exports.getVenues = async function (req, res) {
         if(venueSearchRequest.sortBy == undefined
             || venueSearchRequest.sortBy == null
             || venueSearchRequest.sortBy == ""){
-            results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+            results.sort(keySort('avgStarRating', venueSearchRequest.reverseSort));
         }else{
             let keyArr = venueSearchRequest.sortBy.split(",");
             keyArr.forEach(function (key) {
                 console.log(key.trim());
                 switch (key.trim()) {
                     case 'STAR_RATING':
-                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                        results.sort(keySort('avgStarRating', venueSearchRequest.reverseSort));
                         break;
                     case 'COST_RATING':
-                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                        results.sort(keySort('avgCostRating', venueSearchRequest.reverseSort));
                         break;
                     case 'DISTANCE':
                         results.sort(keySort('distance', venueSearchRequest.reverseSort));
