@@ -110,7 +110,7 @@ exports.getVenues = async function (req, res) {
         if(venueSearchRequest.maxCostRating != undefined){
             for(let i = 0; i < results.length; i++) {
                 if(results[i].avgCostRating != null && results[i].avgCostRating != ""
-                    && results[i].avgCostRating > venueSearchRequest.minStarRating) {
+                    && results[i].avgCostRating > venueSearchRequest.maxCostRating) {
                     results.splice(i, 1);
                 }
             }
