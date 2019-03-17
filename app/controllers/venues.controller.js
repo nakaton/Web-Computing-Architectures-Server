@@ -126,10 +126,6 @@ exports.getVenues = async function (req, res) {
 
                 item.distance = distance;
             });
-        }else{
-            results.forEach(function (item) {
-                item.distance = "";
-            });
         }
 
         if(venueSearchRequest.reverseSort == undefined || venueSearchRequest.reverseSort == null || venueSearchRequest.reverseSort == ""){
