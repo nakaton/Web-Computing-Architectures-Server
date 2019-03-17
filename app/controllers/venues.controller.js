@@ -141,25 +141,27 @@ exports.getVenues = async function (req, res) {
         }
 
         // //Sort By key columns and reverseSort
-        // if(venueSearchRequest.sortBy == undefined){
-        //     keySort('meanStarRating', venueSearchRequest.reverseSort);
-        // }else{
-        //     let keyArr = venueSearchRequest.sortBy.split(",");
-        //     keyArr.forEach(function (key) {
-        //         console.log(key.trim());
-        //         switch (key.trim()) {
-        //             case 'STAR_RATING':
-        //                 results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
-        //                 break;
-        //             case 'COST_RATING':
-        //                 results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
-        //                 break;
-        //             case 'DISTANCE':
-        //                 results.sort(keySort('distance', venueSearchRequest.reverseSort));
-        //                 break;
-        //         }
-        //     })
-        // }
+        if(venueSearchRequest.sortBy == undefined
+            || venueSearchRequest.sortBy == null
+            || venueSearchRequest.sortBy == ""){
+            results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+        }else{
+            let keyArr = venueSearchRequest.sortBy.split(",");
+            keyArr.forEach(function (key) {
+                console.log(key.trim());
+                switch (key.trim()) {
+                    case 'STAR_RATING':
+                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                        break;
+                    case 'COST_RATING':
+                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                        break;
+                    case 'DISTANCE':
+                        results.sort(keySort('distance', venueSearchRequest.reverseSort));
+                        break;
+                }
+            })
+        }
 
         res.statusMessage = 'OK';
         res.status(200)
