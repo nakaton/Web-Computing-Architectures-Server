@@ -67,13 +67,6 @@ exports.getVenues = async function (req, res) {
         sqlCommand += " and Venue.admin_id = " + venueSearchRequest.adminId
     }
 
-    // Define the starting record and number of items to include
-    if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
-        venueSearchRequest.count = 999999;
-    }
-    if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
-        venueSearchRequest.startIndex = 0;
-    }
     sqlCommand += " group by venueId, " +
         "venueName, " +
         "categoryId, " +
@@ -81,8 +74,7 @@ exports.getVenues = async function (req, res) {
         "shortDescription, " +
         "latitude, " +
         "longitude, " +
-        "primaryPhoto " +
-        "limit " + venueSearchRequest.startIndex + "," + venueSearchRequest.count + ";";
+        "primaryPhoto "
 
     console.log("sqlCommand: " + sqlCommand);
 
@@ -163,9 +155,22 @@ exports.getVenues = async function (req, res) {
             })
         }
 
+        // Define the starting record and number of items to include
+        if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
+            venueSearchRequest.startIndex = 0;
+        }
+        if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
+            venueSearchRequest.count = results.length - venueSearchRequest.startIndex;
+        }
+
+        let finalResults = [];
+        for(let i = venueSearchRequest.startIndex,j = 1 ; j <= venueSearchRequest.count && i < results.length; i++, j++) {
+            finalResults.push(results[i]);
+        }
+
         res.statusMessage = 'OK';
         res.status(200)
-            .json(results);
+            .json(finalResults);
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
