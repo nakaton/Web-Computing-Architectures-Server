@@ -38,8 +38,8 @@ exports.getVenues = async function (req, res) {
         "Venue.short_description as shortDescription," +
         "Venue.latitude as latitude," +
         "Venue.longitude as longitude," +
-        "AVG(Review.star_rating)  as avgStarRating," +
-        "AVG(Review.cost_rating)  as avgCostRating," +
+        "AVG(Review.star_rating)  as meanStarRating," +
+        "AVG(Review.cost_rating)  as modeCostRating," +
         "VenuePhoto.photo_filename as primaryPhoto " +
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
@@ -93,8 +93,8 @@ exports.getVenues = async function (req, res) {
             && venueSearchRequest.minStarRating != null
             && venueSearchRequest.minStarRating != ""){
             for(let i = 0; i < results.length; i++) {
-                if(results[i].avgStarRating != null && results[i].avgStarRating != ""
-                    && results[i].avgStarRating < venueSearchRequest.minStarRating) {
+                if(results[i].meanStarRating != null && results[i].meanStarRating != ""
+                    && results[i].meanStarRating < venueSearchRequest.minStarRating) {
                     results.splice(i, 1);
                 }
             }
@@ -105,8 +105,8 @@ exports.getVenues = async function (req, res) {
             && venueSearchRequest.maxCostRating != null
             && venueSearchRequest.maxCostRating != ""){
             for(let i = 0; i < results.length; i++) {
-                if(results[i].avgCostRating != null && results[i].avgCostRating != ""
-                    && results[i].avgCostRating > venueSearchRequest.maxCostRating) {
+                if(results[i].modeCostRating != null && results[i].modeCostRating != ""
+                    && results[i].modeCostRating > venueSearchRequest.maxCostRating) {
                     results.splice(i, 1);
                 }
             }
@@ -147,17 +147,17 @@ exports.getVenues = async function (req, res) {
         if(venueSearchRequest.sortBy == undefined
             || venueSearchRequest.sortBy == null
             || venueSearchRequest.sortBy == ""){
-            results.sort(keySort('avgStarRating', venueSearchRequest.reverseSort));
+            results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
         }else{
             let keyArr = venueSearchRequest.sortBy.split(",");
             keyArr.forEach(function (key) {
                 console.log(key.trim());
                 switch (key.trim()) {
                     case 'STAR_RATING':
-                        results.sort(keySort('avgStarRating', venueSearchRequest.reverseSort));
+                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
                         break;
                     case 'COST_RATING':
-                        results.sort(keySort('avgCostRating', venueSearchRequest.reverseSort));
+                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
                         break;
                     case 'DISTANCE':
                         results.sort(keySort('distance', venueSearchRequest.reverseSort));
