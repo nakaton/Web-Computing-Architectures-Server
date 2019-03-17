@@ -48,30 +48,30 @@ exports.getVenues = async function (req, res) {
         "where 1=1 ";
 
     //Add city as a condition
-    if(venueSearchRequest.city != undefined){
+    if(venueSearchRequest.city != undefined && venueSearchRequest.city != null && venueSearchRequest.city != ""){
         sqlCommand += " and Venue.city = '" + venueSearchRequest.city + "'"
     }
 
     //Add q as a condition
-    if(venueSearchRequest.q != undefined){
+    if(venueSearchRequest.q != undefined && venueSearchRequest.q != null && venueSearchRequest.q != ""){
         sqlCommand += " and Venue.venue_name like '%" + venueSearchRequest.q + "%'"
     }
 
     //Add categoryId as a condition
-    if(venueSearchRequest.categoryId != undefined){
+    if(venueSearchRequest.categoryId != undefined && venueSearchRequest.categoryId != null && venueSearchRequest.categoryId != ""){
         sqlCommand += " and Venue.category_id = " + venueSearchRequest.categoryId
     }
 
     //Add adminId as a condition
-    if(venueSearchRequest.adminId != undefined){
+    if(venueSearchRequest.adminId != undefined && venueSearchRequest.adminId != null && venueSearchRequest.adminId != ""){
         sqlCommand += " and Venue.admin_id = " + venueSearchRequest.adminId
     }
 
     // Define the starting record and number of items to include
-    if (venueSearchRequest.count == undefined) {
+    if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
         venueSearchRequest.count = 999999;
     }
-    if(venueSearchRequest.startIndex == undefined) {
+    if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
         venueSearchRequest.startIndex = 0;
     }
     sqlCommand += " group by venueId, " +
