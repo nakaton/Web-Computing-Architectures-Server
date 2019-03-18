@@ -38,8 +38,8 @@ exports.getVenues = async function (req, res) {
         "Venue.short_description as shortDescription," +
         "Venue.latitude as latitude," +
         "Venue.longitude as longitude," +
-        "AVG(Review.star_rating)  as meanStarRating," +
-        "AVG(Review.cost_rating)  as modeCostRating," +
+        "Review.star_rating  as starRating," +
+        "Review.cost_rating  as costRating," +
         "VenuePhoto.photo_filename as primaryPhoto " +
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
@@ -67,7 +67,7 @@ exports.getVenues = async function (req, res) {
         sqlCommand += " and Venue.admin_id = " + venueSearchRequest.adminId
     }
 
-    sqlCommand += " group by venueId, " +
+    sqlCommand += " order by venueId, " +
         "venueName, " +
         "categoryId, " +
         "city, " +
@@ -88,14 +88,71 @@ exports.getVenues = async function (req, res) {
             }
         }
 
+        //Calculate meanStarRating and modeStarRating
+        let previousItem = results[0];
+        let totalStarRating = 0;
+        let meanStarRating = 0;
+        let modeCostRating = 0;
+        let costRatingArr = [];
+        let stepResult = [];
+
+        results.forEach(function (item) {
+            if(previousItem.venueId == item.venueId){
+                totalStarRating += item.starRating;
+                costRatingArr.push(item.costRating);
+                previousItem = item;
+            }else{
+                meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+                modeCostRating = modeCalculation(costRatingArr);
+                let venue = {
+                    "venueId":previousItem.venueId,
+                    "venueName":previousItem.venueName,
+                    "categoryId":previousItem.categoryId,
+                    "city":previousItem.city,
+                    "shortDescription":previousItem.shortDescription,
+                    "latitude":previousItem.latitude,
+                    "longitude":previousItem.longitude,
+                    "meanStarRating":meanStarRating,
+                    "modeCostRating":modeCostRating,
+                    "primaryPhoto":previousItem.primaryPhoto,
+                    "distance":previousItem.distance
+                }
+                totalStarRating = item.starRating;
+                meanStarRating = 0;
+                modeCostRating = 0;
+                costRatingArr = [];
+                costRatingArr.push(item.costRating);
+                previousItem = item;
+                stepResult.push(venue);
+            }
+        })
+
+        //Add in the last Venue
+        meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+        modeCostRating = modeCalculation(costRatingArr);
+        let venue = {
+            "venueId":previousItem.venueId,
+            "venueName":previousItem.venueName,
+            "categoryId":previousItem.categoryId,
+            "city":previousItem.city,
+            "shortDescription":previousItem.shortDescription,
+            "latitude":previousItem.latitude,
+            "longitude":previousItem.longitude,
+            "meanStarRating":meanStarRating,
+            "modeCostRating":modeCostRating,
+            "primaryPhoto":previousItem.primaryPhoto,
+            "distance":previousItem.distance
+        }
+        stepResult.push(venue);
+
         //Only include Venues that have an average (mean) star rating >= minStarRating.
         if(venueSearchRequest.minStarRating != undefined
             && venueSearchRequest.minStarRating != null
             && venueSearchRequest.minStarRating != ""){
-            for(let i = 0; i < results.length; i++) {
-                if(results[i].meanStarRating != null && results[i].meanStarRating != ""
-                    && results[i].meanStarRating < venueSearchRequest.minStarRating) {
-                    results.splice(i, 1);
+            for(let i = 0; i < stepResult.length; i++) {
+                if(stepResult[i].meanStarRating != null && stepResult[i].meanStarRating != ""
+                    && stepResult[i].meanStarRating < venueSearchRequest.minStarRating) {
+                    stepResult.splice(i, 1);
                 }
             }
         }
@@ -104,10 +161,10 @@ exports.getVenues = async function (req, res) {
         if(venueSearchRequest.maxCostRating != undefined
             && venueSearchRequest.maxCostRating != null
             && venueSearchRequest.maxCostRating != ""){
-            for(let i = 0; i < results.length; i++) {
-                if(results[i].modeCostRating != null && results[i].modeCostRating != ""
-                    && results[i].modeCostRating > venueSearchRequest.maxCostRating) {
-                    results.splice(i, 1);
+            for(let i = 0; i < stepResult.length; i++) {
+                if(stepResult[i].modeCostRating != null && stepResult[i].modeCostRating != ""
+                    && stepResult[i].modeCostRating > venueSearchRequest.maxCostRating) {
+                    stepResult.splice(i, 1);
                 }
             }
         }
@@ -120,7 +177,7 @@ exports.getVenues = async function (req, res) {
             && venueSearchRequest.myLongitude != undefined
             && venueSearchRequest.myLongitude != null
             && venueSearchRequest.myLongitude != ""){
-            results.forEach(function (item) {
+            stepResult.forEach(function (item) {
                 let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
                     item.latitude, item.longitude);
 
@@ -143,20 +200,20 @@ exports.getVenues = async function (req, res) {
         if(venueSearchRequest.sortBy == undefined
             || venueSearchRequest.sortBy == null
             || venueSearchRequest.sortBy == ""){
-            results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+            stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
         }else{
             let keyArr = venueSearchRequest.sortBy.split(",");
             keyArr.forEach(function (key) {
                 console.log(key.trim());
                 switch (key.trim()) {
                     case 'STAR_RATING':
-                        results.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                        stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
                         break;
                     case 'COST_RATING':
-                        results.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                        stepResult.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
                         break;
                     case 'DISTANCE':
-                        results.sort(keySort('distance', venueSearchRequest.reverseSort));
+                        stepResult.sort(keySort('distance', venueSearchRequest.reverseSort));
                         break;
                 }
             })
@@ -171,8 +228,8 @@ exports.getVenues = async function (req, res) {
         }
 
         let finalResults = [];
-        for(let i = venueSearchRequest.startIndex,j = 1 ; j <= venueSearchRequest.count && i < results.length; i++, j++) {
-            finalResults.push(results[i]);
+        for(let i = venueSearchRequest.startIndex,j = 1 ; j <= venueSearchRequest.count && i < stepResult.length; i++, j++) {
+            finalResults.push(stepResult[i]);
         }
 
         res.statusMessage = 'OK';
@@ -458,4 +515,31 @@ function keySort(key,reverseSort){
     return function(a,b){
         return reverseSort ? ~~(a[key] < b[key]) : ~~(a[key] > b[key]);
     }
+}
+
+/**
+ * Mode Calculation
+ * @param costRatingArr
+ * return value
+ */
+function modeCalculation(costRatingArr){
+    let map = new Map();
+    costRatingArr.forEach(function (item) {
+        if(map.get(item)){
+            map.set(item, map.get(item) + 1);
+        }else{
+            map.set(item, 1);
+        }
+    })
+
+    let maxCount = 0;
+    let modeValue = 0;
+    map.forEach(function (item, key) {
+        if(item > maxCount){
+            maxCount = item;
+            modeValue = key;
+        }
+    })
+
+    return modeValue;
 }
