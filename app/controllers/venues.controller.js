@@ -524,7 +524,7 @@ function toRadians(d) {
  */
 function keySort(key,reverseSort){
     return function(a,b){
-        return reverseSort ? ~~(a[key] > b[key]) : ~~(a[key] < b[key]);
+        return reverseSort ? (a[key] - b[key]) : (b[key] - a[key]);
     }
 }
 
