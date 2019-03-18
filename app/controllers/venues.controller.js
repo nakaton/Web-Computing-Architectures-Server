@@ -118,6 +118,7 @@ exports.getVenues = async function (req, res) {
                         "primaryPhoto":previousItem.primaryPhoto,
                         "distance":previousItem.distance
                     }
+
                     totalStarRating = item.starRating;
                     meanStarRating = 0;
                     modeCostRating = 0;
