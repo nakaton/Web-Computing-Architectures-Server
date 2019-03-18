@@ -550,6 +550,9 @@ function modeCalculation(costRatingArr){
             maxCount = item;
             modeValue = key;
         }
+        if(item = maxCount && key > modeValue){
+            modeValue = key;
+        }
     })
 
     return modeValue;
