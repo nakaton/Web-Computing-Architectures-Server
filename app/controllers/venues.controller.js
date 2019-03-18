@@ -88,153 +88,159 @@ exports.getVenues = async function (req, res) {
             }
         }
 
-        //Calculate meanStarRating and modeStarRating
-        let previousItem = results[0];
-        let totalStarRating = 0;
-        let meanStarRating = 0;
-        let modeCostRating = 0;
-        let costRatingArr = [];
-        let stepResult = [];
+        if(results.length > 0){
+            //Calculate meanStarRating and modeStarRating
+            let previousItem = results[0];
+            let totalStarRating = 0;
+            let meanStarRating = 0;
+            let modeCostRating = 0;
+            let costRatingArr = [];
+            let stepResult = [];
 
-        results.forEach(function (item) {
-            if(previousItem.venueId == item.venueId){
-                totalStarRating += item.starRating;
-                costRatingArr.push(item.costRating);
-                previousItem = item;
-            }else{
-                meanStarRating = Math.round(totalStarRating / costRatingArr.length);
-                modeCostRating = modeCalculation(costRatingArr);
-                let venue = {
-                    "venueId":previousItem.venueId,
-                    "venueName":previousItem.venueName,
-                    "categoryId":previousItem.categoryId,
-                    "city":previousItem.city,
-                    "shortDescription":previousItem.shortDescription,
-                    "latitude":previousItem.latitude,
-                    "longitude":previousItem.longitude,
-                    "meanStarRating":meanStarRating,
-                    "modeCostRating":modeCostRating,
-                    "primaryPhoto":previousItem.primaryPhoto,
-                    "distance":previousItem.distance
-                }
-                totalStarRating = item.starRating;
-                meanStarRating = 0;
-                modeCostRating = 0;
-                costRatingArr = [];
-                costRatingArr.push(item.costRating);
-                previousItem = item;
-                stepResult.push(venue);
-            }
-        })
-
-        //Add in the last Venue
-        meanStarRating = Math.round(totalStarRating / costRatingArr.length);
-        modeCostRating = modeCalculation(costRatingArr);
-        let venue = {
-            "venueId":previousItem.venueId,
-            "venueName":previousItem.venueName,
-            "categoryId":previousItem.categoryId,
-            "city":previousItem.city,
-            "shortDescription":previousItem.shortDescription,
-            "latitude":previousItem.latitude,
-            "longitude":previousItem.longitude,
-            "meanStarRating":meanStarRating,
-            "modeCostRating":modeCostRating,
-            "primaryPhoto":previousItem.primaryPhoto,
-            "distance":previousItem.distance
-        }
-        stepResult.push(venue);
-
-        //Only include Venues that have an average (mean) star rating >= minStarRating.
-        if(venueSearchRequest.minStarRating != undefined
-            && venueSearchRequest.minStarRating != null
-            && venueSearchRequest.minStarRating != ""){
-            for(let i = 0; i < stepResult.length; i++) {
-                if(stepResult[i].meanStarRating != null && stepResult[i].meanStarRating != ""
-                    && stepResult[i].meanStarRating < venueSearchRequest.minStarRating) {
-                    stepResult.splice(i, 1);
-                }
-            }
-        }
-
-        //Only include Venues that have an average (mode) cost rating <= maxCostRating.
-        if(venueSearchRequest.maxCostRating != undefined
-            && venueSearchRequest.maxCostRating != null
-            && venueSearchRequest.maxCostRating != ""){
-            for(let i = 0; i < stepResult.length; i++) {
-                if(stepResult[i].modeCostRating != null && stepResult[i].modeCostRating != ""
-                    && stepResult[i].modeCostRating > venueSearchRequest.maxCostRating) {
-                    stepResult.splice(i, 1);
-                }
-            }
-        }
-
-        //The distance field only included in the results
-        //when myLatitude and myLongitude parameters are provided.
-        if(venueSearchRequest.myLatitude != undefined
-            && venueSearchRequest.myLatitude != null
-            && venueSearchRequest.myLatitude != ""
-            && venueSearchRequest.myLongitude != undefined
-            && venueSearchRequest.myLongitude != null
-            && venueSearchRequest.myLongitude != ""){
-            stepResult.forEach(function (item) {
-                let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
-                    item.latitude, item.longitude);
-
-                item.distance = distance;
-            });
-        }
-
-        if(venueSearchRequest.reverseSort == undefined || venueSearchRequest.reverseSort == null || venueSearchRequest.reverseSort == ""){
-            venueSearchRequest.reverseSort = false;
-        }else{
-            if(venueSearchRequest.reverseSort == "false"){
-                venueSearchRequest.reverseSort = false;
-            }
-            if(venueSearchRequest.reverseSort == "true"){
-                venueSearchRequest.reverseSort = true;
-            }
-        }
-
-        //Sort By key columns and reverseSort
-        if(venueSearchRequest.sortBy == undefined
-            || venueSearchRequest.sortBy == null
-            || venueSearchRequest.sortBy == ""){
-            stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
-        }else{
-            let keyArr = venueSearchRequest.sortBy.split(",");
-            keyArr.forEach(function (key) {
-                console.log(key.trim());
-                switch (key.trim()) {
-                    case 'STAR_RATING':
-                        stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
-                        break;
-                    case 'COST_RATING':
-                        stepResult.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
-                        break;
-                    case 'DISTANCE':
-                        stepResult.sort(keySort('distance', venueSearchRequest.reverseSort));
-                        break;
+            results.forEach(function (item) {
+                if(previousItem.venueId == item.venueId){
+                    totalStarRating += item.starRating;
+                    costRatingArr.push(item.costRating);
+                    previousItem = item;
+                }else{
+                    meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+                    modeCostRating = modeCalculation(costRatingArr);
+                    let venue = {
+                        "venueId":previousItem.venueId,
+                        "venueName":previousItem.venueName,
+                        "categoryId":previousItem.categoryId,
+                        "city":previousItem.city,
+                        "shortDescription":previousItem.shortDescription,
+                        "latitude":previousItem.latitude,
+                        "longitude":previousItem.longitude,
+                        "meanStarRating":meanStarRating,
+                        "modeCostRating":modeCostRating,
+                        "primaryPhoto":previousItem.primaryPhoto,
+                        "distance":previousItem.distance
+                    }
+                    totalStarRating = item.starRating;
+                    meanStarRating = 0;
+                    modeCostRating = 0;
+                    costRatingArr = [];
+                    costRatingArr.push(item.costRating);
+                    previousItem = item;
+                    stepResult.push(venue);
                 }
             })
-        }
 
-        // Define the starting record and number of items to include
-        if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
-            venueSearchRequest.startIndex = 0;
-        }
-        if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
-            venueSearchRequest.count = results.length - venueSearchRequest.startIndex;
-        }
+            //Add in the last Venue
+            meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+            modeCostRating = modeCalculation(costRatingArr);
+            let venue = {
+                "venueId":previousItem.venueId,
+                "venueName":previousItem.venueName,
+                "categoryId":previousItem.categoryId,
+                "city":previousItem.city,
+                "shortDescription":previousItem.shortDescription,
+                "latitude":previousItem.latitude,
+                "longitude":previousItem.longitude,
+                "meanStarRating":meanStarRating,
+                "modeCostRating":modeCostRating,
+                "primaryPhoto":previousItem.primaryPhoto,
+                "distance":previousItem.distance
+            }
+            stepResult.push(venue);
 
-        let finalResults = [];
-        for(let i = venueSearchRequest.startIndex,j = 1 ; j <= venueSearchRequest.count && i < stepResult.length; i++, j++) {
-            finalResults.push(stepResult[i]);
-        }
+            //Only include Venues that have an average (mean) star rating >= minStarRating.
+            if(venueSearchRequest.minStarRating != undefined
+                && venueSearchRequest.minStarRating != null
+                && venueSearchRequest.minStarRating != ""){
+                for(let i = 0; i < stepResult.length; i++) {
+                    if(stepResult[i].meanStarRating != null && stepResult[i].meanStarRating != ""
+                        && stepResult[i].meanStarRating < venueSearchRequest.minStarRating) {
+                        stepResult.splice(i, 1);
+                    }
+                }
+            }
 
-        res.statusMessage = 'OK';
-        res.status(200)
-            .json(finalResults);
+            //Only include Venues that have an average (mode) cost rating <= maxCostRating.
+            if(venueSearchRequest.maxCostRating != undefined
+                && venueSearchRequest.maxCostRating != null
+                && venueSearchRequest.maxCostRating != ""){
+                for(let i = 0; i < stepResult.length; i++) {
+                    if(stepResult[i].modeCostRating != null && stepResult[i].modeCostRating != ""
+                        && stepResult[i].modeCostRating > venueSearchRequest.maxCostRating) {
+                        stepResult.splice(i, 1);
+                    }
+                }
+            }
+
+            //The distance field only included in the results
+            //when myLatitude and myLongitude parameters are provided.
+            if(venueSearchRequest.myLatitude != undefined
+                && venueSearchRequest.myLatitude != null
+                && venueSearchRequest.myLatitude != ""
+                && venueSearchRequest.myLongitude != undefined
+                && venueSearchRequest.myLongitude != null
+                && venueSearchRequest.myLongitude != ""){
+                stepResult.forEach(function (item) {
+                    let distance = calculateDistance(venueSearchRequest.myLatitude, venueSearchRequest.myLongitude,
+                        item.latitude, item.longitude);
+
+                    item.distance = distance;
+                });
+            }
+
+            if(venueSearchRequest.reverseSort == undefined || venueSearchRequest.reverseSort == null || venueSearchRequest.reverseSort == ""){
+                venueSearchRequest.reverseSort = false;
+            }else{
+                if(venueSearchRequest.reverseSort == "false"){
+                    venueSearchRequest.reverseSort = false;
+                }
+                if(venueSearchRequest.reverseSort == "true"){
+                    venueSearchRequest.reverseSort = true;
+                }
+            }
+
+            //Sort By key columns and reverseSort
+            if(venueSearchRequest.sortBy == undefined
+                || venueSearchRequest.sortBy == null
+                || venueSearchRequest.sortBy == ""){
+                stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+            }else{
+                let keyArr = venueSearchRequest.sortBy.split(",");
+                keyArr.forEach(function (key) {
+                    console.log(key.trim());
+                    switch (key.trim()) {
+                        case 'STAR_RATING':
+                            stepResult.sort(keySort('meanStarRating', venueSearchRequest.reverseSort));
+                            break;
+                        case 'COST_RATING':
+                            stepResult.sort(keySort('modeCostRating', venueSearchRequest.reverseSort));
+                            break;
+                        case 'DISTANCE':
+                            stepResult.sort(keySort('distance', venueSearchRequest.reverseSort));
+                            break;
+                    }
+                })
+            }
+
+            // Define the starting record and number of items to include
+            if(venueSearchRequest.startIndex == undefined || venueSearchRequest.startIndex == null || venueSearchRequest.startIndex == "") {
+                venueSearchRequest.startIndex = 0;
+            }
+            if (venueSearchRequest.count == undefined || venueSearchRequest.count == null || venueSearchRequest.count == "") {
+                venueSearchRequest.count = results.length - venueSearchRequest.startIndex;
+            }
+
+            let finalResults = [];
+            for(let i = venueSearchRequest.startIndex,j = 1 ; j <= venueSearchRequest.count && i < stepResult.length; i++, j++) {
+                finalResults.push(stepResult[i]);
+            }
+
+            res.statusMessage = 'OK';
+            res.status(200)
+                .json(finalResults);
+        }else{
+            res.statusMessage = 'OK';
+            res.status(200)
+                .json(results);
+        }
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';
