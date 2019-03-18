@@ -38,9 +38,9 @@ exports.getVenues = async function (req, res) {
         "Venue.short_description as shortDescription," +
         "Venue.latitude as latitude," +
         "Venue.longitude as longitude," +
-        "ifnull(Review.star_rating, 0)  as starRating," +
-        "ifnull(Review.cost_rating, 0)  as costRating," +
-        "ifnull(VenuePhoto.photo_filename,'') as primaryPhoto " +
+        "Review.star_rating as starRating," +
+        "Review.cost_rating as costRating," +
+        "VenuePhoto.photo_filename as primaryPhoto " +
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
         "left join Review on Venue.venue_id = Review.reviewed_venue_id " +
@@ -92,8 +92,8 @@ exports.getVenues = async function (req, res) {
             //Calculate meanStarRating and modeStarRating
             let previousItem = results[0];
             let totalStarRating = 0;
-            let meanStarRating = 0;
-            let modeCostRating = 0;
+            let meanStarRating = null;
+            let modeCostRating = null;
             let costRatingArr = [];
             let stepResult = [];
 
@@ -103,7 +103,9 @@ exports.getVenues = async function (req, res) {
                     costRatingArr.push(item.costRating);
                     previousItem = item;
                 }else{
-                    meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+                    if(costRatingArr.length > 0 && costRatingArr[0] != null){
+                        meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+                    }
                     modeCostRating = modeCalculation(costRatingArr);
                     let venue = {
                         "venueId":previousItem.venueId,
@@ -120,8 +122,8 @@ exports.getVenues = async function (req, res) {
                     }
 
                     totalStarRating = item.starRating;
-                    meanStarRating = 0;
-                    modeCostRating = 0;
+                    meanStarRating = null;
+                    modeCostRating = null;
                     costRatingArr = [];
                     costRatingArr.push(item.costRating);
                     previousItem = item;
@@ -130,7 +132,9 @@ exports.getVenues = async function (req, res) {
             })
 
             //Add in the last Venue
-            meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+            if(costRatingArr.length > 0 && costRatingArr[0] != null){
+                meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+            }
             modeCostRating = modeCalculation(costRatingArr);
             let venue = {
                 "venueId":previousItem.venueId,
@@ -540,7 +544,7 @@ function modeCalculation(costRatingArr){
     })
 
     let maxCount = 0;
-    let modeValue = 0;
+    let modeValue = null;
     map.forEach(function (item, key) {
         if(item > maxCount){
             maxCount = item;
