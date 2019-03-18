@@ -38,9 +38,9 @@ exports.getVenues = async function (req, res) {
         "Venue.short_description as shortDescription," +
         "Venue.latitude as latitude," +
         "Venue.longitude as longitude," +
-        "Review.star_rating  as starRating," +
-        "Review.cost_rating  as costRating," +
-        "VenuePhoto.photo_filename as primaryPhoto " +
+        "ifnull(Review.star_rating, 0)  as starRating," +
+        "ifnull(Review.cost_rating, 0)  as costRating," +
+        "ifnull(VenuePhoto.photo_filename,'') as primaryPhoto " +
         "from Venue " +
         "left join VenueCategory on Venue.category_id = VenueCategory.category_id " +
         "left join Review on Venue.venue_id = Review.reviewed_venue_id " +
@@ -103,7 +103,7 @@ exports.getVenues = async function (req, res) {
                     costRatingArr.push(item.costRating);
                     previousItem = item;
                 }else{
-                    meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+                    meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
                     modeCostRating = modeCalculation(costRatingArr);
                     let venue = {
                         "venueId":previousItem.venueId,
@@ -129,7 +129,7 @@ exports.getVenues = async function (req, res) {
             })
 
             //Add in the last Venue
-            meanStarRating = Math.round(totalStarRating / costRatingArr.length);
+            meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
             modeCostRating = modeCalculation(costRatingArr);
             let venue = {
                 "venueId":previousItem.venueId,
