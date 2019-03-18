@@ -104,7 +104,7 @@ exports.getVenues = async function (req, res) {
                     previousItem = item;
                 }else{
                     if(costRatingArr.length > 0 && costRatingArr[0] != null){
-                        meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+                        meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10000) / 10000;
                     }
                     modeCostRating = modeCalculation(costRatingArr);
                     let venue = {
@@ -133,7 +133,7 @@ exports.getVenues = async function (req, res) {
 
             //Add in the last Venue
             if(costRatingArr.length > 0 && costRatingArr[0] != null){
-                meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10) / 10;
+                meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10000) / 10000;
             }
             modeCostRating = modeCalculation(costRatingArr);
             let venue = {
