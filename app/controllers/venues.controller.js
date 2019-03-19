@@ -402,7 +402,9 @@ exports.getVenueById = async function (req, res) {
                 }else{
                     photos.isPrimary = true;
                 }
-                venue.photos.push(photos);
+                if(photos.photoFilename != undefined && photos.photoFilename != null && photos.photoFilename != ""){
+                    venue.photos.push(photos);
+                }
             });
 
             res.statusMessage = 'OK';
