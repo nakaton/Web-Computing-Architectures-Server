@@ -105,7 +105,7 @@ exports.ChangeVenueDetailsRequest = function ChangeVenueDetailsRequest(changeVen
 exports.VenueCategory = function VenueCategory(venueCategory){
     this.categoryId = venueCategory.categoryId;
     this.categoryName = venueCategory.categoryName;
-    this.categoryDescription = venueCategory.categoryDescription;
+    // this.categoryDescription = venueCategory.categoryDescription;
 }
 
 /*
