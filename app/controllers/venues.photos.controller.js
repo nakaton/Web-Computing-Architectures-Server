@@ -67,6 +67,21 @@ exports.postVenuesPhoto = async function (req, res) {
         return;
     }
 
+    //should return 400 when we upload a photo for a venue without providing a description
+    if(description == undefined || description == null || description == ""){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    //should return 400 when we upload a photo for a venue with a makePrimary field that is the wrong type
+    if(makePrimary != true || makePrimary != false || makePrimary != "true" || makePrimary != "false"){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     fs.rename(path, destination+originalName, function (err) {
         if(err) {
