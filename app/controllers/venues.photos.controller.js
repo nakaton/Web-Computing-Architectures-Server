@@ -76,7 +76,7 @@ exports.postVenuesPhoto = async function (req, res) {
     }
 
     //should return 400 when we upload a photo for a venue with a makePrimary field that is the wrong type
-    if(makePrimary != true || makePrimary != false || makePrimary != "true" || makePrimary != "false"){
+    if(makePrimary != true && makePrimary != false && makePrimary != "true" && makePrimary != "false"){
         res.statusMessage = 'Bad Request';
         res.status(400)
             .send();
