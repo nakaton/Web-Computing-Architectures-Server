@@ -31,6 +31,21 @@ exports.getVenues = async function (req, res) {
         return;
     }
 
+    //Sorting by distance should return a 400 if the myLatitude and myLongitude parameters are not provided.
+    if(venueSearchRequest.sortBy == "DISTANCE"){
+        if(venueSearchRequest.myLatitude == undefined
+            || venueSearchRequest.myLatitude == null
+            || venueSearchRequest.myLatitude == ""
+            || venueSearchRequest.myLongitude == undefined
+            || venueSearchRequest.myLongitude == null
+            || venueSearchRequest.myLongitude == ""){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+            return;
+        }
+    }
+
     let sqlCommand = "select Venue.venue_id as venueId," +
         "Venue.venue_name as venueName," +
         "VenueCategory.category_id as categoryId," +

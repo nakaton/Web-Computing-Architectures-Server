@@ -14,6 +14,22 @@ exports.postVenuesPhoto = async function (req, res) {
     let makePrimary = req.body.makePrimary;
     let token = req.header('X-Authorization');
 
+    // VenueId is required
+    if(venueId == undefined || venueId == null || venueId.trim() == ""){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
+    // Request body is required
+    if(req.body == undefined || description == undefined || makePrimary == undefined || req.file == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     let path = req.file.path; //Include path and name
     let originalName = req.file.originalname;
     let destination = req.file.destination;

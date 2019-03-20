@@ -74,6 +74,14 @@ exports.postVenueReview = async function (req, res) {
     console.log("sqlByVenueId: " + sqlByVenueId);
     console.log("sqlForReviewCount: " + sqlForReviewCount);
 
+    // VenueId is required
+    if(venueId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     try{
         const user = await Users.getUserByToken(sqlByToken, token);
         const venue = await Venues.getVenueByVenueId(sqlByVenueId, venueId);
