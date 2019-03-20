@@ -86,6 +86,21 @@ exports.postVenueReview = async function (req, res) {
             return;
         }
 
+        //when venue is not found
+        if(venue.length <= 0){
+            res.statusMessage = 'Not Found';
+            res.status(404)
+                .send();
+            return;
+        }else{
+            if(venue[0].adminId == undefined || venue[0].adminId == null || venue[0].adminId == ""){
+                res.statusMessage = 'Not Found';
+                res.status(404)
+                    .send();
+                return;
+            }
+        }
+
         //A user cannot review a venue they're admin of
         if(user.length > 0 && venue.length > 0){
             if(user[0].userId == venue[0].adminId){
