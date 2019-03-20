@@ -194,6 +194,14 @@ exports.getUser = async function (req, res) {
 
     console.log("userId: " + userId);
 
+    // userId is required
+    if(userId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     //Authorise check
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
     try{
@@ -264,6 +272,14 @@ exports.patchUser = async function (req, res) {
 
     console.log("userId: " + userId);
     console.log("token: " + token);
+
+    // userId is required
+    if(userId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlByUserId = "select auth_token as token, " +
         "given_name as giveName, " +

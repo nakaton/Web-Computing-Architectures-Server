@@ -11,6 +11,14 @@ exports.getLatestReview = async function (req, res) {
 
     console.log("venueId: " + venueId);
 
+    // VenueId is required
+    if(venueId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     let sqlCommand = "select User.user_id as userId, " +
         "User.username as username, " +
         "Review.review_body as reviewBody, " +
@@ -64,6 +72,14 @@ exports.postVenueReview = async function (req, res) {
     console.log("token: " + token);
     console.log("starRating: " + postReviewRequest.starRating);
     console.log("costRating: " + postReviewRequest.costRating);
+
+    // VenueId is required
+    if(venueId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
     let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
@@ -164,6 +180,14 @@ exports.getAllReviewByUser = async function (req, res) {
 
     console.log("userId: " + userId);
     console.log("token: " + token);
+
+    // userId is required
+    if(userId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlByToken = "select user_id as userId, username as username from User where auth_token = ?";
 

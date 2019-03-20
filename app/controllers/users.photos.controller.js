@@ -13,6 +13,14 @@ exports.getUsersPhotoById = async function (req, res) {
     let token = req.header('X-Authorization');
     let path = photoDirectory;
 
+    // userId is required
+    if(userId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     // //Authorise check
     // let sqlByToken = "select user_id as userId from User where auth_token = ?";
     // try{
@@ -93,6 +101,14 @@ exports.setUsersPhoto = async function (req, res) {
     let path = photoDirectory;
     let photoFilename = '';
     let isOldPhotoExist = false;
+
+    // userId is required
+    if(userId == undefined || file.length <= 0){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     if(mimeType == 'image/jpeg'){
         photoFilename = 'user_' + userId + '.jpeg';
@@ -200,6 +216,14 @@ exports.deleteUsersPhoto = async function (req, res) {
     let token = req.header('X-Authorization');
     let path = photoDirectory;
     let profilePhotoFilename = '';
+
+    // userId is required
+    if(userId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     // Check whether user photo is exist
     let isUserExistSql = "select user_id as userId, " +

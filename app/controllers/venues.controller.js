@@ -374,6 +374,14 @@ exports.getVenueById = async function (req, res) {
     console.log("venueId: " + venueId);
     console.log("token: " + token);
 
+    // VenueId is required
+    if(venueId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     let sqlForVenueDetail = "select Venue.venue_name as venueName, " +
         "User.user_id as userId, " +
         "User.username as username, " +
@@ -445,6 +453,14 @@ exports.patchVenueById = async function (req, res) {
 
     console.log("venueId: " + venueId);
     console.log("token: " + token);
+
+    // VenueId is required
+    if(venueId == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
     let sqlByToken = "select user_id as userId from User where auth_token = ?";

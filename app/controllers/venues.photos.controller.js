@@ -170,6 +170,14 @@ exports.getSpecificVenuePhoto = async function (req, res) {
     let token = req.header('X-Authorization');
     let path = photoDirectory;
 
+    // VenueId and photoFilename are required
+    if(venueId == undefined || photoFilename == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
+
     // //Authorise check
     // let sqlByToken = "select user_id as userId from User where auth_token = ?";
     // try{
@@ -244,6 +252,14 @@ exports.deleteSpecificVenuePhoto = async function (req, res) {
     let token = req.header('X-Authorization');
     let path = photoDirectory;
     let adminId = "";
+
+    // VenueId and photoFilename are required
+    if(venueId == undefined || photoFilename == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     // Check whether Venue Photo is exist
     let isVenueExistSql = "select Venue.admin_id as adminId " +
@@ -331,6 +347,14 @@ exports.setPrimary = async function (req, res) {
     let photoFilename = req.params.photoFilename;
     let token = req.header('X-Authorization');
     let adminId = "";
+
+    // VenueId and photoFilename are required
+    if(venueId == undefined || photoFilename == undefined){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return;
+    }
 
     // Check whether Venue Photo is exist
     let isVenueExistSql = "select Venue.admin_id as adminId " +
