@@ -184,17 +184,8 @@ exports.getVenueById = async function (sql, venueId) {
 /*
 * Function 'patchVenue' for patch venues detail
 */
-exports.patchVenue = async function (sql, venueId, changeVenueDetailsRequest) {
+exports.patchVenue = async function (sql, values) {
     try {
-        let values = [changeVenueDetailsRequest.venueName,
-            changeVenueDetailsRequest.categoryId,
-            changeVenueDetailsRequest.city,
-            changeVenueDetailsRequest.shortDescription,
-            changeVenueDetailsRequest.longDescription,
-            changeVenueDetailsRequest.address,
-            changeVenueDetailsRequest.latitude,
-            changeVenueDetailsRequest.longitude,
-            venueId];
         return await db.getPool().query(sql, values);
     } catch (err) {
         console.log(err.sql);

@@ -462,7 +462,15 @@ exports.patchVenueById = async function (req, res) {
         return;
     }
 
-    let sqlByVenueId = "select admin_id as adminId from Venue where venue_id = ?";
+    let sqlByVenueId = "select admin_id as adminId," +
+        "category_id as categoryId," +
+        "venue_name as venueName," +
+        "city as city," +
+        "short_description as shortDescription," +
+        "long_description as longDescription," +
+        "address as address," +
+        "latitude as latitude," +
+        "longitude as longitude from Venue where venue_id = ?";
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
 
     console.log("sqlByVenueId: " + sqlByVenueId);
@@ -494,18 +502,56 @@ exports.patchVenueById = async function (req, res) {
             }
         }
 
-        let sqlForPatchVenue = "update Venue " +
-            "set venue_name = ?, " +
-            "category_id = ?, " +
-            "city = ?, " +
-            "short_description = ?, " +
-            "long_description = ?, " +
-            "address = ?, " +
-            "latitude = ?, " +
-            "longitude = ? " +
-            "where venue_id = ?";
+        let values = [];
+        let sqlForPatchVenue = "update Venue set venue_name = ? ";
 
-        await Venues.patchVenue(sqlForPatchVenue, venueId, changeVenueDetailsRequest);
+        if(changeVenueDetailsRequest.venueName != undefined && venue[0].venueName != changeVenueDetailsRequest.venueName){
+            values.push(changeVenueDetailsRequest.venueName)
+        }else{
+            values.push(venue[0].venueName)
+        }
+
+        if(changeVenueDetailsRequest.categoryId != undefined && venue[0].categoryId != changeVenueDetailsRequest.categoryId){
+            sqlForPatchVenue += ", category_id = ? "
+            values.push(changeVenueDetailsRequest.categoryId)
+        }
+
+        if(changeVenueDetailsRequest.city != undefined && venue[0].city != changeVenueDetailsRequest.city){
+            sqlForPatchVenue += ", city = ? "
+            values.push(changeVenueDetailsRequest.city)
+        }
+
+        if(changeVenueDetailsRequest.shortDescription != undefined && venue[0].shortDescription != changeVenueDetailsRequest.shortDescription){
+            sqlForPatchVenue += ", short_description = ? "
+            values.push(changeVenueDetailsRequest.shortDescription)
+        }
+
+        if(changeVenueDetailsRequest.longDescription != undefined && venue[0].longDescription != changeVenueDetailsRequest.longDescription){
+            sqlForPatchVenue += ", long_description = ? "
+            values.push(changeVenueDetailsRequest.longDescription)
+        }
+
+        if(changeVenueDetailsRequest.address != undefined && venue[0].address != changeVenueDetailsRequest.address){
+            sqlForPatchVenue += ", address = ? "
+            values.push(changeVenueDetailsRequest.address)
+        }
+
+        if(changeVenueDetailsRequest.latitude != undefined && venue[0].latitude != changeVenueDetailsRequest.latitude){
+            sqlForPatchVenue += ", latitude = ? "
+            values.push(changeVenueDetailsRequest.latitude)
+        }
+
+        if(changeVenueDetailsRequest.longitude != undefined && venue[0].longitude != changeVenueDetailsRequest.longitude){
+            sqlForPatchVenue += ", longitude = ? "
+            values.push(changeVenueDetailsRequest.longitude)
+        }
+
+        sqlForPatchVenue += "where venue_id = ?"
+        values.push(venueId)
+
+        console.log("sqlForPatchVenue: " + sqlForPatchVenue)
+
+        await Venues.patchVenue(sqlForPatchVenue, values);
 
         res.statusMessage = 'OK';
         res.status(200)
