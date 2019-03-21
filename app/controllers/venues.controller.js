@@ -450,6 +450,7 @@ exports.patchVenueById = async function (req, res) {
     let venueId = req.params.id;
     let token = req.header('X-Authorization');
     let changeVenueDetailsRequest = new Venues.ChangeVenueDetailsRequest(req.body);
+    let isDifferent = false
 
     console.log("venueId: " + venueId);
     console.log("token: " + token);
@@ -507,6 +508,7 @@ exports.patchVenueById = async function (req, res) {
 
         if(changeVenueDetailsRequest.venueName != undefined && venue[0].venueName != changeVenueDetailsRequest.venueName){
             values.push(changeVenueDetailsRequest.venueName)
+            isDifferent = true
         }else{
             values.push(venue[0].venueName)
         }
@@ -514,40 +516,54 @@ exports.patchVenueById = async function (req, res) {
         if(changeVenueDetailsRequest.categoryId != undefined && venue[0].categoryId != changeVenueDetailsRequest.categoryId){
             sqlForPatchVenue += ", category_id = ? "
             values.push(changeVenueDetailsRequest.categoryId)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.city != undefined && venue[0].city != changeVenueDetailsRequest.city){
             sqlForPatchVenue += ", city = ? "
             values.push(changeVenueDetailsRequest.city)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.shortDescription != undefined && venue[0].shortDescription != changeVenueDetailsRequest.shortDescription){
             sqlForPatchVenue += ", short_description = ? "
             values.push(changeVenueDetailsRequest.shortDescription)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.longDescription != undefined && venue[0].longDescription != changeVenueDetailsRequest.longDescription){
             sqlForPatchVenue += ", long_description = ? "
             values.push(changeVenueDetailsRequest.longDescription)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.address != undefined && venue[0].address != changeVenueDetailsRequest.address){
             sqlForPatchVenue += ", address = ? "
             values.push(changeVenueDetailsRequest.address)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.latitude != undefined && venue[0].latitude != changeVenueDetailsRequest.latitude){
             sqlForPatchVenue += ", latitude = ? "
             values.push(changeVenueDetailsRequest.latitude)
+            isDifferent = true
         }
 
         if(changeVenueDetailsRequest.longitude != undefined && venue[0].longitude != changeVenueDetailsRequest.longitude){
             sqlForPatchVenue += ", longitude = ? "
             values.push(changeVenueDetailsRequest.longitude)
+            isDifferent = true
         }
 
         sqlForPatchVenue += "where venue_id = ?"
         values.push(venueId)
+
+        if(!isDifferent){
+            res.statusMessage = 'Bad Request';
+            res.status(400)
+                .send();
+            return;
+        }
 
         console.log("sqlForPatchVenue: " + sqlForPatchVenue)
 
