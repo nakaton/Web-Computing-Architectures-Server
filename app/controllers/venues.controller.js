@@ -303,6 +303,13 @@ exports.postVenue = async function (req, res) {
     let token = req.header('X-Authorization');
     let createVenueRequest = new Venues.CreateVenueRequest(req.body);
 
+    if(createVenueRequest.latitude > 90.0 || createVenueRequest.longitude < -180.0){
+        res.statusMessage = 'Bad Request';
+        res.status(400)
+            .send();
+        return
+    }
+
     console.log("token: " + token);
 
     let sqlByToken = "select user_id as userId from User where auth_token = ?";
