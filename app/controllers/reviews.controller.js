@@ -5,7 +5,7 @@ const Venues = require('../models/venues.model');
 /**
  * Retrieves a venue's reviews.
  */
-exports.getLatestReview = async function (req, res) {
+exports.getReviewsByVenueId = async function (req, res) {
     //Extract query params from request
     let venueId = req.params.id;
 
@@ -33,24 +33,27 @@ exports.getLatestReview = async function (req, res) {
     console.log("sqlCommand: " + sqlCommand);
 
     try {
-        const results = await Reviews.getLatestReview(sqlCommand, venueId);
-        if (results.length > 0){
+        const results = await Reviews.getReviewsByVenueId(sqlCommand, venueId);
+        res.statusMessage = 'OK';
+        res.status(200)
+            .json(results);
+        // if (results.length > 0){
 
-            let review = new Reviews.Review(results[0]);
-            let reviewAuthor = new Reviews.ReviewAuthor(results[0]);
+            // let review = new Reviews.Review(results[0]);
+            // let reviewAuthor = new Reviews.ReviewAuthor(results[0]);
+            //
+            // review.reviewAuthor = reviewAuthor;
+            //
+            // console.log(review);
 
-            review.reviewAuthor = reviewAuthor;
-
-            console.log(review);
-
-            res.statusMessage = 'OK';
-            res.status(200)
-                .json(review);
-        }else{
-            res.statusMessage = 'Not Found';
-            res.status(404)
-                .send();
-        }
+            // res.statusMessage = 'OK';
+            // res.status(200)
+            //     .json(results);
+        // }else{
+        //     res.statusMessage = 'Not Found';
+        //     res.status(404)
+        //         .send();
+        // }
     } catch (err) {
         if (!err.hasBeenLogged) console.error(err);
         res.statusMessage = 'Bad Request';

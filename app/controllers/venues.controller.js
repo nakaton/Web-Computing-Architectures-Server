@@ -120,6 +120,8 @@ exports.getVenues = async function (req, res) {
                 }else{
                     if(costRatingArr.length > 0 && costRatingArr[0] != null){
                         meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10000) / 10000;
+                    }else{
+                        meanStarRating = 3;
                     }
                     modeCostRating = modeCalculation(costRatingArr);
                     let venue = {
@@ -149,6 +151,8 @@ exports.getVenues = async function (req, res) {
             //Add in the last Venue
             if(costRatingArr.length > 0 && costRatingArr[0] != null){
                 meanStarRating = Math.round(totalStarRating / costRatingArr.length * 10000) / 10000;
+            }else{
+                meanStarRating = 3;
             }
             modeCostRating = modeCalculation(costRatingArr);
             let venue = {
@@ -167,27 +171,35 @@ exports.getVenues = async function (req, res) {
             stepResult.push(venue);
 
             //Only include Venues that have an average (mean) star rating >= minStarRating.
+            let starFilterResult = [];
             if(venueSearchRequest.minStarRating != undefined
                 && venueSearchRequest.minStarRating != null
                 && venueSearchRequest.minStarRating != ""){
                 for(let i = 0; i < stepResult.length; i++) {
                     if(stepResult[i].meanStarRating != null && stepResult[i].meanStarRating != ""
                         && stepResult[i].meanStarRating < venueSearchRequest.minStarRating) {
-                        stepResult.splice(i, 1);
+
+                    }else{
+                        starFilterResult.push(stepResult[i])
                     }
                 }
+                stepResult = starFilterResult;
             }
 
             //Only include Venues that have an average (mode) cost rating <= maxCostRating.
+            let costFilterResult = [];
             if(venueSearchRequest.maxCostRating != undefined
                 && venueSearchRequest.maxCostRating != null
                 && venueSearchRequest.maxCostRating != ""){
                 for(let i = 0; i < stepResult.length; i++) {
                     if(stepResult[i].modeCostRating != null && stepResult[i].modeCostRating != ""
                         && stepResult[i].modeCostRating > venueSearchRequest.maxCostRating) {
-                        stepResult.splice(i, 1);
+
+                    }else{
+                        costFilterResult.push(stepResult[i])
                     }
                 }
+                stepResult = costFilterResult;
             }
 
             //The distance field only included in the results

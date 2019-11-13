@@ -19,7 +19,7 @@ module.exports = function (app) {
 
     //Review
     app.route(app.rootUrl + '/venues/:id/reviews')
-        .get(review.getLatestReview);
+        .get(review.getReviewsByVenueId);
     app.route(app.rootUrl + '/venues/:id/reviews')
         .post(review.postVenueReview);
     app.route(app.rootUrl + '/users/:id/reviews')

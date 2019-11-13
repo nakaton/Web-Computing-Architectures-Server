@@ -53,13 +53,23 @@ exports.VenueBrief = function VenueBrief(venueBrief) {
 }
 
 /*
-* Function 'getLatestReview' for Retrieves a venue's reviews.
+* Function 'getReviewsByVenueId' for Retrieves a venue's reviews.
 */
-exports.getLatestReview = async function (sql, venueId) {
+exports.getReviewsByVenueId = async function (sql, venueId) {
     try {
         let values = [venueId];
 
-        return await db.getPool().query(sql, values);
+        const reviews =  await db.getPool().query(sql, values);
+        return reviews.map(review => ({
+            'reviewAuthor': {
+                'userId': review.user_id,
+                'username': review.username
+            },
+            'reviewBody': review.review_body,
+            'starRating': review.star_rating,
+            'costRating': review.cost_rating,
+            'timePosted': review.time_posted
+        }));
     } catch (err) {
         console.log(err.sql);
         throw err;
