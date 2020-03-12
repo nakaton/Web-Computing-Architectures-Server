@@ -1,5 +1,5 @@
 {
-  "name": "SENG365-Travel-Site-API",
+  "name": "seng365-travel-site-api",
   "version": "0.0.1",
   "scripts": {
     "start": "node server.js",

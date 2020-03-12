@@ -62,7 +62,7 @@ exports.getReviewsByVenueId = async function (sql, venueId) {
         const reviews =  await db.getPool().query(sql, values);
         return reviews.map(review => ({
             'reviewAuthor': {
-                'userId': review.user_id,
+                'userId': review.userId,
                 'username': review.username
             },
             'reviewBody': review.review_body,
