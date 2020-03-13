@@ -406,7 +406,7 @@ exports.getVenueById = async function (req, res) {
         "User.username as username, " +
         "VenueCategory.category_id as categoryId, " +
         "VenueCategory.category_name as categoryName, " +
-        // "VenueCategory.category_description as categoryDescription, " +
+        "VenueCategory.category_description as categoryDescription, " +
         "Venue.city as city, Venue.short_description as shortDescription, " +
         "Venue.long_description as longDescription, Venue.date_added as dateAdded, " +
         "Venue.address as address, Venue.latitude as latitude, Venue.longitude as longitude, " +
