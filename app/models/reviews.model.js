@@ -65,10 +65,10 @@ exports.getReviewsByVenueId = async function (sql, venueId) {
                 'userId': review.userId,
                 'username': review.username
             },
-            'reviewBody': review.review_body,
-            'starRating': review.star_rating,
-            'costRating': review.cost_rating,
-            'timePosted': review.time_posted
+            'reviewBody': review.reviewBody,
+            'starRating': review.starRating,
+            'costRating': review.costRating,
+            'timePosted': review.timePosted
         }));
     } catch (err) {
         console.log(err.sql);
